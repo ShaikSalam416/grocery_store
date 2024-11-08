@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+  <title>Out-of-Stock Products</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+    <h1>Out-of-Stock Products</h1>
+    {% if out_of_stock_products %}
+      <table>
+        <thead>
+          <tr>
+            <th>Product Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in out_of_stock_products %}
+          <tr>
+            <td>{{ product.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No products are out of stock.</p>
+    {% endif %}
+    <div class="col text-left">
+      <a href="{% url 'home' %}" class="btn btn-secondary">Back to home</a>
+  </div>
+  </body>
+  {% endblock %}

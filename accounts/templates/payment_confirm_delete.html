@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Customer Payment</title>
+</head>
+<body>
+    <h2>Delete Customer Payment</h2>
+    <p>Are you sure you want to delete the payment from {{ payment.customer_name }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, delete</button>
+    </form>
+    <a href="{% url 'payment_list' %}">Cancel</a>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Orders List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="container">
+    <div class="row align-items-center mt-4">
+        <div class="col text-left">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to home</a>
+        </div>
+        <div class="col text-center">
+            <h1>Daily Orders List</h1>
+        </div>
+        <div class="col text-right">
+            <a href="{% url 'orders_create' %}" class="btn btn-primary">Create New Order</a>
+        </div>
+    </div>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td><a href = "{% url 'orders_detail' order.id%}"> {{ order.name }}</a></td>
+                    <td>{{ order.date }}</td>
+                    <td>
+                        <a href="{% url 'orders_update' order.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <form action="{% url 'orders_delete' order.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+{% endblock %}

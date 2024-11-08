@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - QKR Grocery Store Management System</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-size: 20px;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #f0f4f8;
+            background-image: url('{% static "bgimage1.jpg" %}'); /* Path to your image */
+            background-size: cover; /* Ensures the image covers the entire area */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: #007bff; /* Primary blue */
+        }
+        .navbar a {
+            color: white !important;
+            font-weight: 600;
+        }
+        .navbar a:hover {
+            color: #ffc107 !important; /* Gold on hover */
+        }
+        .navbar-nav .nav-item {
+            margin-left: 15px;
+        }
+        .footer {
+            background-color: #343a40; /* Dark gray */
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: auto; /* Pushes footer to the bottom */
+        }
+        .custom-header {
+        color: silver;              /* Change text color to silver */
+        background-color: black;   /* Change background to black */
+        padding: 10px;             /* Add some padding for better appearance */
+        text-align: center;        /* Center the text */
+        margin: 0;
+        }
+        .container {
+            margin-top: 20px;
+            flex-grow: 1; /* Allows the container to expand and fill the space */
+        }
+        .main-content {
+            padding: 20px;
+            background-color: transparent;
+           /* background-color: rgba(255, 255, 255, 0.9);  Slightly transparent for better visibility */
+            border-radius: 5px;
+            /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="{% url 'home' %}">Qaiser Kirana Store (QKR)</a> -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product_list' %}">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'function_orders_list' %}">Function OrdersList</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'orders_list' %}">Daily OrdersList</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sales_summary' %}">Sales</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'out_of_stock_products' %}">Out Of Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'journal_list' %}">Journal Note Book</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'function_debt_customer_list' %}">Function Due Customer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'daily_debt_customer_list' %}">Daily Due Customer</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'signup' %}">Signup</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <h2 class="custom-header">NEW QAISER<br>KIRANA & GENERAL STORE<br></h2>
+            <main>
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; {{ current_year }} QKR. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

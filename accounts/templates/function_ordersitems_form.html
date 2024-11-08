@@ -1,0 +1,17 @@
+<!-- templates/orders_form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Order</title>
+</head>
+<body>
+    <h1>Create Order</h1>
+    <form method="post">  <!-- Ensure method is POST -->
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields -->
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'function_orders_list' %}">Cancel</a>  <!-- Adjust the URL as needed -->
+</body>
+</html>

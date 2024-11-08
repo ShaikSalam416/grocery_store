@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Journal Entries</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Journal Entries</h1>
+        
+        <form method="GET" class="mb-4">
+            <div class="form-row align-items-end">
+                <div class="col-auto">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" required>
+                </div>
+                <div class="col-auto">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" required>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <a href="{% url 'home' %}" class="btn btn-primary mb-3">Back to home</a>
+        <a href="{% url 'journal_create' %}" class="btn btn-primary mb-3">Add New Entry</a>
+        <ul class="list-group">
+            {% for entry in journal_entries %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ entry }} 
+                    <span>
+                        <a href="{% url 'journal_update' entry.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'journal_delete' entry.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </span>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No entries found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+{% endblock %}

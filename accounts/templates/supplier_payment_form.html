@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Supplier Payment</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Supplier Payment</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.supplier_name.label_tag }} {{ form.supplier_name }}<br>
+        {{ form.amount.label_tag }} {{ form.amount }}<br>
+        
+        <label for="id_date">Date:</label>
+        <input type="date" name="date" id="id_date" value="{{ form.date.value|default:'' }}" required><br>
+
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'supplier_payment_list' %}">Back to List</a>
+</body>
+</html>

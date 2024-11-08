@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ form.instance.pk|yesno:"Edit Product, New Product" }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-size: 20px;
+            margin: 0; /* Remove any margin */
+        }
+        .container {
+            margin-top: 10px; /* Reduce margin-top to bring content closer */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: add shadow for some effect */
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 15px; /* Reduced margin-bottom */
+            color: #343a40;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .back-link {
+            margin-top: 20px;
+            display: block;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>{{ form.instance.pk|yesno:"Edit Product, New Product" }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+        <a href="{% url 'product_list' %}" class="back-link">Back to Product List</a>
+    </div>
+{% endblock %}

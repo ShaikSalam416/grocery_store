@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Sales Summary</h1>
+    
+    <!-- Filter Form -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label for="from_date" class="form-label">From Date:</label>
+                <input type="date" name="from_date" class="form-control" id="from_date" value="{{ from_date }}">
+            </div>
+            <div class="col-md-5 mb-3">
+                <label for="to_date" class="form-label">To Date:</label>
+                <input type="date" name="to_date" class="form-control" id="to_date" value="{{ to_date }}">
+            </div>
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Sales Data Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Total Sale Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales_summary %}
+                <tr>
+                    <td>{{ sale.date }}</td>
+                    <td>{{ sale.total_sales|floatformat:2 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center">No sales data found for the selected date range.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

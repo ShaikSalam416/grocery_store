@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Order</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+        .container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        h1, h2 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .product-list {
+            margin-top: 10px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            width: calc(100% - 30px);
+            display: none; /* Initially hidden */
+        }
+        .product-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .product-item:hover {
+            background-color: #e9ecef;
+        }
+        .no-results {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .billing-table {
+            margin-top: 30px;
+        }
+        .billing-table th {
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
+</head>
+<body class="container">
+    <h1>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Order</h1>
+
+    <form method="post" action="{% url 'orders_create' %}">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render your order form fields -->
+
+        <h2 class="mt-4">Billing List</h2>
+        <table class="table table-bordered billing-table">
+            <thead class="thead-light">
+                <tr>
+                    <th>S.No</th>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>MRP</th>
+                    <th>Price</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="billingBody">
+                <tr>
+                    <td colspan="1"></td>
+                    <td>
+                        <input type="text" id="productSearch" class="form-control" placeholder="Search for products..." name="q" value="{{ query }}" autofocus onkeyup="searchProducts()">
+                    </td>
+                    <td colspan="5"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="product-list" id="productList">
+            {% if products %}
+                {% for product in products %}
+                    <div class="product-item" data-price="{{ product.Retail_price }}"
+                         data-id="{{ product.id }}"
+                         data-mrp="{{ product.mrp }}"
+                         onclick="addItem('{{ product.name }}', {{ product.Retail_price }}, {{ product.id }}, {{ product.mrp }})">
+                        <span class="product-name">{{ product.name }} - Rs {{ product.Retail_price }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">No products available.</div>
+            {% endif %}
+        </div>
+
+        <!-- <div class="no-results text-center">No products match your search criteria.</div> -->
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-success">Submit Order</button>
+            <a href="{% url 'orders_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="button" class="btn btn-primary" onclick="printBill()">Print Bill</button>
+        </div>
+    </form>
+
+    <script>
+        function searchProducts() {
+            const input = document.getElementById('productSearch').value.toLowerCase();
+            const productList = document.getElementById('productList');
+            const products = productList.getElementsByClassName('product-item');
+            let hasResults = false;
+
+            // Show the product list if there's input
+            productList.style.display = input ? 'block' : 'none';
+
+            for (let i = 0; i < products.length; i++) {
+                const productName = products[i].textContent.toLowerCase();
+                if (productName.includes(input)) {
+                    products[i].style.display = 'block';
+                    hasResults = true;
+                } else {
+                    products[i].style.display = 'none';
+                }
+            }
+
+            // Show "No results" message if no products match the search
+            document.querySelector('.no-results').style.display = hasResults ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

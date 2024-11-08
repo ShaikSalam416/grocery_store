@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #343a40;
+            text-transform: uppercase;
+
+        }
+        .back-button, .actions a {
+            font-size: 16px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-button:hover, .actions a:hover {
+            text-decoration: underline;
+        }
+        .search-form {
+            margin-bottom: 20px;
+        }
+        .search-form input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            width: 300px;
+        }
+        .table {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-collapse: collapse; /* Collapse borders */
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+        .table th, .table td {
+            padding: 8px; /* Reduced padding */
+            vertical-align: middle; /* Center content vertically */
+            text-transform: uppercase;
+
+        }
+        .table tr {
+            margin: 0; /* Remove margin between rows */
+        }
+        .table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .no-results {
+            text-align: center;
+            font-size: 18px;
+            color: #dc3545;
+            margin-top: 20px;
+            display: none; /* Initially hidden */
+        }
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-actions">
+                <a class="back-button" href="{% url 'home' %}">Back to Home</a>
+                <h1>Products List</h1>
+                <a href="{% url 'product_create' %}" class="btn btn-primary">Add New Product</a>
+            </div>
+        </header>
+
+        <div class="search-form">
+            <input type="text" id="productSearch" placeholder="Search..." onkeyup="searchProducts()">
+        </div>
+
+        <div id="productList">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>S.NO</th>
+                        <th>Product Name</th>
+                        <th>MRP</th>
+                        <th>Retail Price</th>
+                        <th>Bulk Price</th>
+                        <th>Stock Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if page_obj %}
+                        {% for product in page_obj %}
+                            <tr class="product-card">
+                                <td>{{ forloop.counter }}</td> <!-- Serial number -->
+                                <td class="card-title">{{ product.name }}</td>
+                                <td class="card-text">Rs {{ product.mrp }}</td>
+                                <td class="card-text">Rs {{ product.Retail_price }}</td>
+                                <td class="card-text">Rs {{ product.Bulk_price }}</td>
+                                <td class="card-text">{{ product.stock_quantity }}</td>
+                                <td>
+                                    <a href="{% url 'product_update' product.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{% url 'product_delete' product.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="no-results">No products found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?q={{ query }}&page=1" class="btn btn-secondary">&laquo; First</a>
+                    <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="btn btn-secondary">Previous</a>
+                {% endif %}
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next</a>
+                    <a href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="no-results" id="noResultsMessage">No products matched your search criteria.</div>
+    </div>
+
+    <script>
+        function searchProducts() {
+            const input = document.getElementById('productSearch').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            const noResults = document.getElementById('noResultsMessage');
+
+            let hasVisibleItems = false;
+
+            // Show all products if the input is empty
+            if (input.length === 0) {
+                productCards.forEach(card => {
+                    card.style.display = 'table-row'; // Show all rows
+                });
+                noResults.style.display = 'none'; // Hide no results message
+                return; // Exit the function early
+            }
+
+            // Hide all product items initially
+            productCards.forEach(card => {
+                card.style.display = 'none'; // Hide all rows
+            });
+
+            // Show matching products
+            productCards.forEach(card => {
+                const productName = card.querySelector('.card-title').textContent.toLowerCase();
+                if (productName.includes(input)) {
+                    card.style.display = 'table-row'; // Show matching row
+                    hasVisibleItems = true;
+                }
+            });
+
+            // Show or hide the no results message based on search results
+            if (hasVisibleItems) {
+                noResults.style.display = 'none'; // Hide no results message
+            } else {
+                noResults.style.display = 'block'; // Show no results message
+            }
+        }
+    </script>
+{% endblock %}
+

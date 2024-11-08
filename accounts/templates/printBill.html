@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <style>
+        body {
+            width: 3in;
+            font-size: 13px;
+            font-family: 'Arial', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .center {
+            text-align: center;
+        }
+        .receipt {
+            width: 100%;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px; /* Spacing between rows */
+            
+        }
+        .item1 {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 5px; /* Increased spacing between rows */
+        }
+        .line {
+            border-bottom: 1px solid #000;
+            margin: 5px 0;
+        }
+        .logo {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+        .email {
+            text-transform: lowercase;
+            text-align: center;
+        }
+        .s-column {
+            flex: 0 0 30px; /* Fixed width for "S." column */
+            text-align: left; /* Align text to the left */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .item-name {
+            flex: 1; /* Allow the item name column to grow */
+            text-align: left; /* Align item names to the left */
+            white-space: normal; /* Allow wrapping */
+            max-width: 120px; /* Set a maximum width for item names */
+            overflow-wrap: break-word; /* Break long words if needed */
+        }
+        .amount-column {
+            flex: 0 0 40px; /* Fixed width for amount columns */
+            text-align: right; /* Align amounts to the right */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .amount-column1 {
+            flex: 0 0 40px; /* Fixed width for amount columns */
+            text-align: right; /* Align amounts to the right */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <img src="{% static 'billlogo2.jpg' %}" alt="Company Logo" class="logo"><br>
+        <div class="center bold">NEW QAISER KIRANA & GENERAL STORE</div>
+        <div class="center">DOOR NO: 18-8-192/2</div>
+        <div class="center">PHILSALBANDA, HYD</div>
+        <div class="center">Phone: 9885052812, 9052383035, 8179622812</div>
+        <div class="email">Email: qaiserkirana1978@gmail.com</div>
+        <div class="line"></div>
+
+        <div class="item">
+            <div>Date: {{ current_date|date:"Y-m-d H:i:s" }}</div>
+            <div>Bill No: {{ billnumber }}</div>
+        </div>
+        <div class="item">
+            <div>Customer: CASH</div>
+        </div>
+        <div class="line"></div>
+        
+        <div class="bold item header">
+            <div class="s-column">S.</div>
+            <div class="item-name">Item</div>
+            <div class="s-column">Qty</div>
+            <div class="amount-column">Mrp</div>
+            <div class="amount-column">Rate</div>
+            <div class="amount-column">Amt</div>
+        </div>
+        <div class="line"></div>
+
+        {% if orderItems %}
+            {% for order in orderItems %}
+                <div class="item1">
+                    <div class="s-column">{{ forloop.counter }}</div>
+                    <div class="item-name">{{ order.product.name }}</div>
+                    <div class="s-column">{{ order.quantity }}</div>
+                    <div class="amount-column">{{ order.product.mrp|floatformat:0  }}</div>
+                    <div class="amount-column">{{ order.product.Retail_price|floatformat:0  }}</div>
+                    <div class="amount-column">{{ order.total_price }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="item">
+                <div>No items in this order.</div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        {% endif %}
+
+        <div class="line"></div>
+        <div class="item">
+            <div>Saved Amount:</div>
+            <div></div>
+            <div class="amount-column1">{{ saved_amount }}</div>
+        </div>
+        <div class="line"></div>
+
+        <div class="item">
+            <div>TOTAL Amount:</div>
+            <div></div>
+            <div class="amount-column1">{{ total }}</div>
+        </div>
+        <div class="item">
+            <div>Cash Received:</div>
+            <div></div>
+            <div class="amount-column1">{{ cash }}</div>
+        </div>
+        <div class="item">
+            <div>Due Amount:</div>
+            <div></div>
+            <div class="amount-column1">{{ due }}</div>
+        </div>
+        <div class="line"></div>
+        
+
+        <div class="center">Thank You, Visit Again!</div>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>
