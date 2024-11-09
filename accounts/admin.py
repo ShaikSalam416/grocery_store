@@ -44,21 +44,21 @@ class OrderItemsAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(FunctionOrders)
-class FunctionOrdersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name','date')  # Fields to display in the list view
-    search_fields = ('name',)  # Fields to search
+# @admin.register(FunctionOrders)
+# class FunctionOrdersAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'name','date')  # Fields to display in the list view
+#     search_fields = ('name',)  # Fields to search
 
 
-@admin.register(FunctionOrderItems)
-class FunctionOrderItemsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'orders', 'quantity')  # Fields to display
-    search_fields = ('orders',)  # Fields to search
-    list_filter = ('orders',)  # Filter by orders
+# @admin.register(FunctionOrderItems)
+# class FunctionOrderItemsAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'product', 'orders', 'quantity')  # Fields to display
+#     search_fields = ('orders',)  # Fields to search
+#     list_filter = ('orders',)  # Filter by orders
 
 
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'function_order_id','daily_order_id','amount','date')  # Fields to display in the list view
-    search_fields = ('function_order_id','daily_order_id',)  # Fields to search
+    list_display = ('id' ,'order_id','amount','date')  # Fields to display in the list view
+    search_fields = ('order_id',)  # Fields to search

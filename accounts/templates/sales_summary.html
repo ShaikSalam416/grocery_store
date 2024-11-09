@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<head>
+    <style>
+        .table-wrapper {
+            overflow-y: auto;
+            max-height: 230px; /* Adjust the height as needed */
+            display: block; /* Make the table block-level */
+            position: relative; /* Needed for sticky positioning */
+      }
+    </style>
+</head>
+<body>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Sales Summary</h1>
     
@@ -22,7 +33,8 @@
     </form>
 
     <!-- Sales Data Table -->
-    <table class="table table-bordered table-striped">
+    <div class="table-wrapper">
+        <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
                 <th>Date</th>
@@ -32,7 +44,7 @@
         <tbody>
             {% for sale in sales_summary %}
                 <tr>
-                    <td>{{ sale.date }}</td>
+                    <td>{{ sale.date|date:"Y-m-d" }}</td>
                     <td>{{ sale.total_sales|floatformat:2 }}</td>
                 </tr>
             {% empty %}
@@ -42,5 +54,6 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
+    </div>
+</body>
 {% endblock %}

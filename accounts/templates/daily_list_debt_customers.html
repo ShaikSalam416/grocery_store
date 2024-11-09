@@ -2,12 +2,31 @@
 
 {% block content %}
 <!-- Begin page content -->
+ <head>
+    <style>
+         .table-wrapper {
+            overflow-y: auto;
+            max-height: 250px; /* Adjust the height as needed */
+            display: block; /* Make the table block-level */
+            position: relative; /* Needed for sticky positioning */
+      }
+    </style>
+ </head>
 
-<div class="container mt-5">
+<!-- <div class="container mt-5">
     <h1 class="text-center mb-4">Daily Debt Customers</h1>
     <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
+</div> -->
+<div class="row align-items-center mt-4">
+    <div class="text-center mb-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back to home</a>
+    </div>
+    <div class="col text-center">
+        <h1>Daily Debt Customers</h1>
+    </div>   
+</div>
     
     
 
@@ -29,6 +48,7 @@
     </form>
 
     <!-- Table of debt customers -->
+    <div class = "table-wrapper">
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
@@ -56,6 +76,7 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>
 
 {% endblock %}

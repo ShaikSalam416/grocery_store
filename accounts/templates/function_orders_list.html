@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Function Orders List</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table-wrapper {
+          overflow-y: auto;
+          max-height: 350px; /* Adjust the height as needed */
+          display: block; /* Make the table block-level */
+          position: relative; /* Needed for sticky positioning */
+        }
+      </style>
 </head>
 <body class="container">
     <div class="row align-items-center mt-4">
@@ -14,9 +22,10 @@
             <h1>Function Orders List</h1>
         </div>
         <div class="col text-right">
-            <a href="{% url 'function_orders_create' %}" class="btn btn-primary">Create New Order</a>
+            <a href="{% url 'function_orders_create' %}?is_function=true" class="btn btn-primary">Create New Order</a>
         </div>
     </div>
+    <div class = "table-wrapper">
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
@@ -43,4 +52,6 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
+    </body>
 {% endblock %}

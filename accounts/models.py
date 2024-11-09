@@ -60,6 +60,7 @@ class Orders(models.Model):
     name = models.CharField(max_length=255)
     # payment = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
     date = models.DateField(default=timezone.now)
+    is_function = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -71,6 +72,14 @@ class Orders(models.Model):
         order_items = OrderItems.objects.filter(orders=self)  # Fetch all related order items for this order
         for item in order_items:
             total += item.total_price  # Sum the total price for each item in the order
+        return total
+    
+    @property
+    def function_total_sale(self):
+        total = 0
+        function_order_items = OrderItems.objects.filter(orders=self)  # Fetch all related function order items for this order
+        for item in function_order_items:
+            total += item.function_total_price  # Sum the total price for each function order item
         return total
 
 
@@ -88,44 +97,48 @@ class OrderItems(models.Model):
         return int(self.quantity * self.product.Retail_price)
     
     @property
+    def function_total_price(self):
+        return int(self.quantity * self.product.Bulk_price)
+    
+    @property
     def mrp_price(self):
         return int(self.quantity * self.product.mrp)
 
 
 
-class FunctionOrders(models.Model):
-    name = models.CharField(max_length=255)
-    # payment = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
-    date = models.DateField(default=timezone.now)
+# class FunctionOrders(models.Model):
+#     name = models.CharField(max_length=255)
+#     # payment = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+#     date = models.DateField(default=timezone.now)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
 
-    @property
-    def total_sale(self):
-        total = 0
-        function_order_items = FunctionOrderItems.objects.filter(orders=self)  # Fetch all related function order items for this order
-        for item in function_order_items:
-            total += item.total_price  # Sum the total price for each function order item
-        return total
+#     @property
+#     def total_sale(self):
+#         total = 0
+#         function_order_items = FunctionOrderItems.objects.filter(orders=self)  # Fetch all related function order items for this order
+#         for item in function_order_items:
+#             total += item.total_price  # Sum the total price for each function order item
+#         return total
 
 
-class FunctionOrderItems(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    orders = models.ForeignKey(FunctionOrders, on_delete=models.CASCADE, null=True)
-    quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0)  
-    # price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
+# class FunctionOrderItems(models.Model):
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+#     orders = models.ForeignKey(FunctionOrders, on_delete=models.CASCADE, null=True)
+#     quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0)  
+#     # price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
 
     
-    @property
-    def total_price(self):
-        return int(self.quantity * self.product.Bulk_price)
+#     @property
+#     def total_price(self):
+#         return int(self.quantity * self.product.Bulk_price)
     
 
 class Payment(models.Model):
-    function_order_id = models.ForeignKey(FunctionOrders, on_delete=models.CASCADE, null=True)
-    daily_order_id = models.ForeignKey(Orders, on_delete=models.CASCADE, null=True)
+    # function_order_id = models.ForeignKey(FunctionOrders, on_delete=models.CASCADE, null=True)
+    order_id = models.ForeignKey(Orders, on_delete=models.CASCADE, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     date = models.DateField(default=timezone.now)
 

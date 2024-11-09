@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Daily Orders List</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table-wrapper {
+          overflow-y: auto;
+          max-height: 350px; /* Adjust the height as needed */
+          display: block; /* Make the table block-level */
+          position: relative; /* Needed for sticky positioning */
+        }
+      </style>
 </head>
 <body class="container">
     <div class="row align-items-center mt-4">
@@ -14,11 +22,12 @@
             <h1>Daily Orders List</h1>
         </div>
         <div class="col text-right">
-            <a href="{% url 'orders_create' %}" class="btn btn-primary">Create New Order</a>
+            <a href="{% url 'orders_create' %}?is_function=false" class="btn btn-primary">Create New Order</a>
         </div>
     </div>
+    <div class="table-wrapper">
     <table class="table table-bordered">
-        <thead class="thead-light">
+        <thead class="thead-light" >
             <tr>
                 <th>ID</th>
                 <th>Name</th>
@@ -43,5 +52,6 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </body>
 {% endblock %}

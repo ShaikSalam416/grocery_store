@@ -20,7 +20,17 @@
             z-index: 1000;
             width: calc(100% - 30px);
             display: none; /* Initially hidden */
+            max-height: 200px; /* Set a maximum height */
+            overflow-y: auto; /* Enable scrolling */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
         }
+        .billing-table {
+            max-height: 170px; /* Set a maximum height for the table */
+            overflow-y: auto; /* Enable scrolling for the table */
+            display: block; /* Make the table block-level */
+            position: relative; /* Needed for sticky positioning */
+        }
+
 
         .product-item {
             padding: 10px;
@@ -38,12 +48,27 @@
             text-align: center;
             color: #777;
         }
+        .thead-light {
+            position: sticky;
+            top: 0; /* Position from the top of the scrollable container */
+            background-color: #f8f9fa; /* Background color for better visibility */
+            z-index: 10; /* Ensure the header stays on top of the content */
+        }
+
+        .table th, .table td {
+            padding: 5px; /* Reduced padding for smaller gaps */
+        }
+
+        .mt-3 {
+            margin-top: 1rem; /* Adjust if needed */
+        }
     </style>
 </head>
 <body class="container">
-    <a href="{% url 'change_function_order_name' Orders.id %}"><h1 class="mt-4">Name: {{ Orders.name }}</h1></a>
-    <a href="{% url 'function_orders_list' %}" class="btn btn-secondary mt-3">Back to Orders</a>
-
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{% url 'change_function_order_name' Orders.id %}"><h1 class="mt-4">Name: {{ Orders.name }}</h1></a>
+        <a href="{% url 'function_orders_list' %}" class="btn btn-secondary mt-3">Back to Orders</a>
+    </div>
     <table class="table table-bordered billing-table mt-3">
         <thead class="thead-light">
             <tr>
@@ -85,7 +110,7 @@
                 <td>{{ order.product.name }}</td>
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.product.Bulk_price }}</td>
-                <td>{{ order.total_price }}</td>
+                <td>{{ order.function_total_price }}</td>
                 <td>
                     <div class="btn-group" role="group">
                         <a href="/orders/function/detail/{{Orders.id}}/?item_id={{order.id}}" class="btn btn-warning btn-sm">Edit</a>
@@ -181,13 +206,14 @@
             url1 = url1.replace(obj1,obj.value);
             document.getElementById("button").href=url1;
         }
-        let selectedIndex = -1;
         function appendURL(obj,obj1){
             url1=document.getElementById("button").href;
             if(obj.value!='')
             url1 = url1.replace(obj1,obj.value);
             document.getElementById("button").href=url1;
         }
+        let selectedIndex = -1;
+
         function searchProducts(event) {
             const input = document.getElementById('productSearch').value.toLowerCase();
             const productList = document.getElementById('productList');
@@ -266,6 +292,20 @@
                     productList.scrollTop = itemOffset + activeItem.clientHeight - listHeight; // Scroll down
                 }
             }
+             // Add event listener to the product list or individual products
+  productList.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      // Get the currently focused product
+      const focusedProduct = document.activeElement;
+
+      // Find the index of the focused product in the visibleProducts array
+      const index = visibleProducts.indexOf(focusedProduct);
+
+      // Update the selectedIndex and call updateSelection
+      selectedIndex = index;
+      updateSelection(visibleProducts);
+    }
+  });
         }
     </script>
 {% endblock %}

@@ -1,14 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<head>
+    <style>
+         .table-wrapper {
+            overflow-y: auto;
+            max-height: 250px; /* Adjust the height as needed */
+            display: block; /* Make the table block-level */
+            position: relative; /* Needed for sticky positioning */
+      }
+    </style>
+ </head>
 <!-- Begin page content -->
 
-<div class="container mt-5">
+<!-- <div class="container mt-5">
     <h1 class="text-center mb-4">Functions Debt Customers</h1>
     <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
-    
+     -->
+     <div class="row align-items-center mt-4">
+        <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to home</a>
+        </div>
+        <div class="col text-center">
+            <h1>Function Debt Customers</h1>
+        </div>   
+    </div>
     
 
     <!-- Form for filtering by dates -->
@@ -29,6 +47,7 @@
     </form>
 
     <!-- Table of debt customers -->
+<div class = "table-wrapper">
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
@@ -57,5 +76,6 @@
         </table>
     </div>
 </div>
+
 
 {% endblock %}

@@ -35,8 +35,8 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'orders_list' %}">Daily Orders List</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'out_of_stock_products' %}">Out Of Stock</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'sales_summary' %}">Sales</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'function_debt_customer_list' %}">Function Due Customer</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'daily_debt_customer_list' %}">Daily Due Customer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'function_debt_customer_list' %}?is_function=True">Function Due Customer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'daily_debt_customer_list' %}?is_function=False">Daily Due Customer</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'journal_list' %}">Journal Book</a></li>
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>

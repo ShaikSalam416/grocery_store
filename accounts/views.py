@@ -6,8 +6,11 @@ from django.http import HttpResponse, JsonResponse
 # from .forms import ProductForm, CustomerForm, PriceVariationForm, SaleForm, SaleItemForm, CustomUserCreationForm
 # from .models import Product, Customer, PriceVariation, Sale, SaleItem
 from django.core.paginator import Paginator
-from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,FunctionOrdersForm, FunctionOrderItemsForm,PaymentForm
-from .models import Product, JournalBook, Orders, OrderItems, FunctionOrders, FunctionOrderItems, Payment
+# from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,FunctionOrdersForm, FunctionOrderItemsForm,PaymentForm
+# from .models import Product, JournalBook, Orders, OrderItems, FunctionOrders, FunctionOrderItems, Payment
+from .models import Product, JournalBook, Orders, OrderItems, Payment
+from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,PaymentForm
+
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -119,7 +122,7 @@ def function_debt_customer_list(request):
     from_date_str  = request.GET.get('from_date')
     to_date_str  = request.GET.get('to_date')
 
-    debt_cust = get_orders_with_pending_balance(request)
+    debt_cust = get_orders_with_pending_balance(request,is_function = True)
 
      # Prepare formatted debt customer data for processing
     formatted_debt_cust = []
@@ -128,7 +131,7 @@ def function_debt_customer_list(request):
         date = row[2]
         debt_customer_data = {
             'order_id': row[0],
-            'pending_amount': row[1],
+            'pending_amount': int(row[1]),
             'date': date,
             'name': row[3],
         }
@@ -166,7 +169,7 @@ def daily_debt_customer_list(request):
     from_date_str  = request.GET.get('from_date')
     to_date_str  = request.GET.get('to_date')
 
-    debt_cust = daily_get_orders_with_pending_balance(request)
+    debt_cust = daily_get_orders_with_pending_balance(request,is_function = False)
 
      # Prepare formatted debt customer data for processing
     formatted_debt_cust = []
@@ -175,7 +178,7 @@ def daily_debt_customer_list(request):
         date = row[2]
         debt_customer_data = {
             'order_id': row[0],
-            'pending_amount': row[1],
+            'pending_amount': int(row[1]),
             'date': date,
             'name': row[3],
         }
@@ -239,7 +242,7 @@ def save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price):
                 pass
 
 def orders_list(request):
-    orders = Orders.objects.all()
+    orders = Orders.objects.filter(is_function=False).order_by('-date')  # '-' before 'date' indicates descending order
     return render(request, 'orders_list.html', {'orders': orders})
 
 def orders_create(request):
@@ -255,7 +258,9 @@ def orders_create(request):
     r_price = request.GET.get('retail_price')
     t_price = request.GET.get('total_price')
 
-    save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price)
+    is_func = request.GET.get('is_function') == 'true' 
+    if is_func:
+        save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price)
 
     form = ProductSearchForm(request.GET or None)  # Initialize the form with GET data
     query = request.GET.get('q', '')  # Get the search query from GET parameters
@@ -269,7 +274,10 @@ def orders_create(request):
     base_name = 'Name'
     
     # Create or get the order
-    order, created = Orders.objects.get_or_create(name=f"{base_name} (temp)", date=date.today())
+    order, created = Orders.objects.get_or_create(name=f"{base_name} (temp)", 
+            date=date.today(),
+            is_function=is_func  # Set is_function field to the value retrieved from the URL
+    )
     
     order_items = OrderItems.objects.filter(orders=order)
     total_price = round(sum(item.total_price for item in order_items))  
@@ -401,7 +409,7 @@ def orders_detail_delete(request, pk):
 def add_item_using_search(request, pk, pk1):
     order = get_object_or_404(Orders, pk=pk)
     p = get_object_or_404(Product, pk=pk1)
-    
+    daily_get_orders_with_pending_balance(request,is_function=False)
     if request.method == 'GET':
         quantity = Decimal(request.POST.get('quantity', 1))  # Default to 1 if not provided
         oi = OrderItems()
@@ -417,7 +425,7 @@ def add_item_using_search(request, pk, pk1):
 
 #Views for Fucntion orders
 def function_orders_list(request):
-    orders = FunctionOrders.objects.all()
+    orders = Orders.objects.filter(is_function=True).order_by('-date')  # '-' before 'date' indicates descending order
     return render(request, 'function_orders_list.html', {'orders': orders})
 
 #For clicking on edit button
@@ -432,7 +440,7 @@ def save_items(edit,selected_id,p_name,quan,b_price,t_price):
       
         if edit is not None:
             try:        
-                foi = FunctionOrderItems.objects.get(id=selected_id)  # Get the existing item
+                foi = OrderItems.objects.get(id=selected_id)  # Get the existing item
                 foi.product.name = p_name
                 if quan == '' or quan is None:
                     # quan = t_price/b_price
@@ -445,7 +453,7 @@ def save_items(edit,selected_id,p_name,quan,b_price,t_price):
                 foi.quantity = quan
                 foi.product.Bulk_price = b_price
                 foi.save()
-            except FunctionOrderItems.DoesNotExist:
+            except OrderItems.DoesNotExist:
                 pass
 
 def function_orders_detail(request, pk):
@@ -471,21 +479,21 @@ def function_orders_detail(request, pk):
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
 
-    order = get_object_or_404(FunctionOrders, pk=pk)
+    order = get_object_or_404(Orders, pk=pk)
     product = Product.objects.all()
-    order_items = FunctionOrderItems.objects.filter(orders=order)
-    total_price = round(sum(item.total_price for item in order_items))  
+    order_items = OrderItems.objects.filter(orders=order)
+    total_price = round(sum(item.function_total_price for item in order_items))  
 
 
     if request.method == 'POST':
-        form = FunctionOrderItemsForm(request.POST)
+        form = OrderItemsForm(request.POST)
         if form.is_valid():
             new_item = form.save(commit=False)
             new_item.orders = order  # Link the item to the current order
             new_item.save()
             return redirect('function_orders_detail', pk=order.pk)  # Redirect to the same detail page to show updated items
     else:
-        form = FunctionOrderItemsForm()
+        form = OrderItemsForm()
     if edit != None:
         selected_id=None
 
@@ -511,10 +519,11 @@ def function_orders_create(request):
     p_name = request.GET.get('product_name')
     quan = request.GET.get('quantity')
     b_price = request.GET.get('bulk_price')
-    t_price = request.GET.get('total_price')
+    t_price = request.GET.get('function_total_price')
 
-    
-    save_items(edit,selected_id,p_name,quan,b_price,t_price)
+    is_func = request.GET.get('is_function') == 'true'
+    if is_func:
+        save_items(edit,selected_id,p_name,quan,b_price,t_price)
 
     form = ProductSearchForm(request.GET or None)  # Initialize the form with GET data
     query = request.GET.get('q', '')  # Get the search query from GET parameters
@@ -530,17 +539,20 @@ def function_orders_create(request):
     base_name = 'Name'
     
     # Create or get the order
-    order, created = FunctionOrders.objects.get_or_create(name=f"{base_name} (temp)", date=date.today())
+    order, created = Orders.objects.get_or_create(name=f"{base_name} (temp)", 
+            date=date.today(),
+            is_function=is_func  # Set is_function field to the value retrieved from the URL
+    )
 
-    order_items = FunctionOrderItems.objects.filter(orders=order)
-    total_price = round(sum(item.total_price for item in order_items))  
+    order_items = OrderItems.objects.filter(orders=order)
+    total_price = round(sum(item.function_total_price for item in order_items))  
     # Update the order's name with its ID
     order.name = f"{base_name} {order.id}"
     order.save()  # Save the updated name to the database
 
     if request.method == 'POST':
         # Handle OrderItems creation
-        item_form = FunctionOrderItemsForm(request.POST)
+        item_form = OrderItemsForm(request.POST)
         if item_form.is_valid():
             new_order_item = item_form.save(commit=False)  # Prevent immediate save
             new_order_item.orders = order  # Link the order item to the created order
@@ -566,19 +578,19 @@ def function_orders_create(request):
 
 
 def function_orders_update(request, pk):
-    order = get_object_or_404(FunctionOrders, pk=pk)
+    order = get_object_or_404(Orders, pk=pk)
     if request.method == 'POST':
-        form = FunctionOrdersForm(request.POST, instance=order)
+        form = OrdersForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
             return redirect('function_orders_list')
     else:
-        form = FunctionOrdersForm(instance=order)
+        form = OrdersForm(instance=order)
         print(form.errors)
     return render(request, 'function_ordersitems_form.html', {'form': form})
 
 def function_orders_delete(request, pk):
-    order = get_object_or_404(FunctionOrders, pk=pk)
+    order = get_object_or_404(Orders, pk=pk)
     if request.method == 'POST':
         order.delete()
         return redirect('function_orders_list')
@@ -586,12 +598,12 @@ def function_orders_delete(request, pk):
 
 
 def function_add_item_using_search(request, pk, pk1):
-    order = get_object_or_404(FunctionOrders, pk=pk)
+    order = get_object_or_404(Orders, pk=pk)
     p = get_object_or_404(Product, pk=pk1)
     
     if request.method == 'GET':
         quantity = Decimal(request.POST.get('quantity', 1))  # Default to 1 if not provided
-        oi = FunctionOrderItems()
+        oi = OrderItems()
         oi.product = p
         oi.orders = order
         oi.quantity = quantity
@@ -604,7 +616,7 @@ def function_add_item_using_search(request, pk, pk1):
 
 
 def function_orders_detail_update(request, pk):
-   order_item = get_object_or_404(FunctionOrderItems, id=pk)
+   order_item = get_object_or_404(OrderItems, id=pk)
     
    if request.method == 'POST':
         quantity = Decimal(request.POST.get('quantity', order_item.quantity))
@@ -615,7 +627,7 @@ def function_orders_detail_update(request, pk):
    return render(request, 'function_orders_detail_update.html', {'order_item': order_item})
 
 def function_orders_detail_delete(request, pk):
-    order_item = get_object_or_404(FunctionOrderItems, pk=pk)
+    order_item = get_object_or_404(OrderItems, pk=pk)
     
     if request.method == 'GET':
         order_item.delete()
@@ -625,7 +637,7 @@ def function_orders_detail_delete(request, pk):
 
 
 def add_function_product_manually(request,pk,product_name,quantity,price):
-    order=get_object_or_404(FunctionOrders, id=pk)
+    order=get_object_or_404(Orders, id=pk)
     Quantity=Decimal(quantity)
     Price=Decimal(price)
     if request.method == 'GET':
@@ -634,7 +646,7 @@ def add_function_product_manually(request,pk,product_name,quantity,price):
         product.save()
 
         # Create a new FunctionOrderItems instance and link it to the order and the new product
-        oi = FunctionOrderItems()
+        oi = OrderItems()
         oi.product = product
         oi.orders = order
         oi.quantity = Decimal(quantity)
@@ -667,14 +679,14 @@ def add_product_manually(request,pk,product_name,quantity,mrp,price):
     return redirect(orders_detail,pk=pk)
 
 def change_function_order_name(request,pk):
-    fo = get_object_or_404(FunctionOrders,pk=pk)
+    fo = get_object_or_404(Orders,pk=pk)
     if request.method == 'POST':
-        form = FunctionOrdersForm(request.POST, instance=fo)
+        form = OrdersForm(request.POST, instance=fo)
         if form.is_valid():
             form.save()
             return redirect('function_orders_detail',pk=pk)
     else:
-        form = FunctionOrdersForm(instance=fo)
+        form = OrdersForm(instance=fo)
     return render(request, 'function_order_change_name_form.html', {'form': form})
 
 
@@ -689,6 +701,23 @@ def change_order_name(request,pk):
         form = OrdersForm(instance=fo)
     return render(request, 'order_change_name_form.html', {'form': form})
 
+    
+def total_cash_recieved(id,cash_recieved1):
+    with connection.cursor() as cursor:
+        cursor.execute(""" 
+            SELECT order_id_id, SUM(amount) AS paid_amount
+                    FROM accounts_payment
+					WHERE order_id_id = %s
+                    GROUP BY order_id_id;
+            """,[id])
+        
+        rows = cursor.fetchall()
+     # If rows are not empty, get the paid_amount, otherwise set it to 0
+    if rows:
+        paid_amount = rows[0][1]  # The paid amount is at index 1 in the result
+    else:
+        paid_amount = 0  # No payments found, set paid amount to 0
+    return paid_amount + cash_recieved1
 
 
 def orders_print_bill(request,pk,cashReceived):
@@ -701,7 +730,10 @@ def orders_print_bill(request,pk,cashReceived):
     # saved_amount = (sum(item.mrp_price for item in order_items))-total
     saved_amount = sum(
         item.mrp_price - item.total_price for item in order_items if item.mrp_price > 0
-    )    
+    )
+    order_id = order.id
+    cash_recieved1 = total_cash_recieved(order_id,cash_recieved)
+    due_amount = int(round(total - cash_recieved1))
     out_of_stock_items = []
 
     
@@ -720,9 +752,9 @@ def orders_print_bill(request,pk,cashReceived):
     # Get the current date to track the bill number
     # today = timezone.now().date()
     today = datetime.now()
-    
+    date = datetime.now().date()
     # Check if the session already has the bill number for today
-    if 'bill_number_date' in request.session and request.session['bill_number_date'] == str(today):
+    if 'bill_number_date' in request.session and request.session['bill_number_date'] == str(date):
         # Increment the bill number for today
         bill_number = request.session.get('bill_number', 0) + 1
     else:
@@ -730,7 +762,7 @@ def orders_print_bill(request,pk,cashReceived):
         bill_number = 1
 
     # Update session data for the bill number and date
-    request.session['bill_number_date'] = str(today)
+    request.session['bill_number_date'] = str(date)
     request.session['bill_number'] = bill_number
 
 
@@ -748,7 +780,7 @@ def orders_print_bill(request,pk,cashReceived):
 
     Payment.objects.create(
             amount = cash_recieved,
-            daily_order_id = order,
+            order_id = order,
             date = timezone.now()
         )
 
@@ -770,13 +802,16 @@ def orders_print_bill(request,pk,cashReceived):
 
 def function_orders_print_bill(request,pk,cashReceived):
     cash_recieved = int(cashReceived)
-    order = get_object_or_404(FunctionOrders,pk=pk)
-    order_items = FunctionOrderItems.objects.filter(orders = order)
-    subtotal = sum(item.total_price for item in order_items)
+    order = get_object_or_404(Orders,pk=pk)
+    order_items = OrderItems.objects.filter(orders = order)
+    subtotal = sum(item.function_total_price for item in order_items)
     total = int(round(subtotal))  # Total after rounding
-    due_amount = int(round(total - cash_recieved))
+    # due_amount = int(round(total - cash_recieved))
     weight = float(sum(item.quantity for item in order_items))
 
+    order_id = order.id
+    cash_recieved1 = total_cash_recieved(order_id,cash_recieved)
+    due_amount = int(round(total - cash_recieved1))
     out_of_stock_items = []
 
     # Check stock for each item and collect out-of-stock items
@@ -793,8 +828,9 @@ def function_orders_print_bill(request,pk,cashReceived):
     # Get the current date to track the bill number
     # today = timezone.now().date()
     today =  datetime.now()    
+    date = datetime.now().date()
     # Check if the session already has the bill number for today
-    if 'bill_number_date' in request.session and request.session['bill_number_date'] == str(today):
+    if 'bill_number_date' in request.session and request.session['bill_number_date'] == str(date):
         # Increment the bill number for today
         bill_number = request.session.get('bill_number', 0) + 1
     else:
@@ -802,24 +838,12 @@ def function_orders_print_bill(request,pk,cashReceived):
         bill_number = 1
 
     # Update session data for the bill number and date
-    request.session['bill_number_date'] = str(today)
+    request.session['bill_number_date'] = str(date)
     request.session['bill_number'] = bill_number
-    
-    context = {
-        'Orders': order,
-        'orderItems': order_items,
-        'total': total,
-        'cash' : cash_recieved,
-        'due' : due_amount,
-        'weight' : weight,
-        'billnumber' : bill_number,
-        # 'total_in_words': total_in_words,
-        'current_date': today,  # Format current date as needed
-    }
 
     Payment.objects.create(
             amount = cash_recieved,
-            function_order_id = order,
+            order_id = order,
             date = timezone.now()
         )
 
@@ -834,37 +858,22 @@ def function_orders_print_bill(request,pk,cashReceived):
         #     # You can raise an error or log it, for now, we'll just print a message
         #     print(f"Insufficient stock for product: {product.name}")
 
+    context = {
+        'Orders': order,
+        'orderItems': order_items,
+        'total': total,
+        'cash' : cash_recieved1,
+        'due' : due_amount,
+        'weight' : weight,
+        'billnumber' : bill_number,
+        # 'total_in_words': total_in_words,
+        'current_date': today,  # Format current date as needed
+    }
     # Render the template
     return render(request, 'function_printBill.html', context)  # Replace with your actual template name
 
 
-def get_orders_with_pending_balance(obj):
-  with connection.cursor() as cursor:
-    cursor.execute("""
-      SELECT e.*, f.date, f.name
-FROM (
-    SELECT c.orders_id, IFNULL(d.paid_amount, 0) - c.order_amount AS pending_amount
-    FROM (
-        SELECT a.orders_id, SUM(a.quantity * b.Bulk_price) AS order_amount
-        FROM accounts_functionorderitems a
-        JOIN accounts_product b ON a.product_id = b.id
-        GROUP BY a.orders_id
-    ) c
-    LEFT JOIN (
-        SELECT function_order_id_id, SUM(amount) AS paid_amount
-        FROM accounts_payment
-        GROUP BY function_order_id_id
-    ) d ON c.orders_id = d.function_order_id_id
-) e
-JOIN accounts_functionorders f ON e.orders_id = f.id
-WHERE e.pending_amount < 0;
-    """)
-    rows = cursor.fetchall()
-     
-    return rows
-
-
-def daily_get_orders_with_pending_balance(obj):
+def get_orders_with_pending_balance(obj,is_function=True):
   with connection.cursor() as cursor:
     cursor.execute("""
       SELECT e.*, f.date, f.name
@@ -877,14 +886,42 @@ FROM (
         GROUP BY a.orders_id
     ) c
     LEFT JOIN (
-        SELECT daily_order_id_id, SUM(amount) AS paid_amount
+        SELECT order_id_id, SUM(amount) AS paid_amount
         FROM accounts_payment
-        GROUP BY daily_order_id_id
-    ) d ON c.orders_id = d.daily_order_id_id
+        GROUP BY order_id_id
+    ) d ON c.orders_id = d.order_id_id
 ) e
 JOIN accounts_orders f ON e.orders_id = f.id
-WHERE e.pending_amount < 0;
-    """)
+WHERE e.pending_amount < 0
+AND f.is_function = %s;
+    """, [is_function])
+    rows = cursor.fetchall()
+     
+    return rows
+
+
+def daily_get_orders_with_pending_balance(obj,is_function=False):
+  with connection.cursor() as cursor:
+    cursor.execute("""
+      SELECT e.*, f.date, f.name
+FROM (
+    SELECT c.orders_id, IFNULL(d.paid_amount, 0) - c.order_amount AS pending_amount
+    FROM (
+        SELECT a.orders_id, SUM(a.quantity * b.Retail_price) AS order_amount
+        FROM accounts_orderitems a
+        JOIN accounts_product b ON a.product_id = b.id
+        GROUP BY a.orders_id
+    ) c
+    LEFT JOIN (
+        SELECT order_id_id, SUM(amount) AS paid_amount
+        FROM accounts_payment
+        GROUP BY order_id_id
+    ) d ON c.orders_id = d.order_id_id
+) e
+JOIN accounts_orders f ON e.orders_id = f.id
+WHERE e.pending_amount < 0
+AND f.is_function = %s;
+    """,[is_function])
     rows = cursor.fetchall()
      
     return rows
@@ -939,8 +976,8 @@ def journal_delete(request, pk):
 
 
 def function_any_item_out_of_stock(request, pk, cash_received):
-    order = get_object_or_404(FunctionOrders, pk=pk)
-    order_items = FunctionOrderItems.objects.filter(orders=order)
+    order = get_object_or_404(Orders, pk=pk)
+    order_items = OrderItems.objects.filter(orders=order)
     
     out_of_stock_items = []
 
@@ -983,56 +1020,6 @@ def daily_any_item_out_of_stock(request, pk, cash_received):
     # Render the template
     return render(request, 'dailyoutofstock.html', context)  # Replace with your actual template name
 
-# def sales_summary(request):
-#     # Get date parameters from the request (if any)
-#     from_date_str = request.GET.get('from_date')
-#     to_date_str = request.GET.get('to_date')
-    
-#     # Convert the date strings to datetime objects if they are provided
-#     from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date() if from_date_str else None
-#     to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date() if to_date_str else None
-
-#     # Fetch Orders and FunctionOrders
-#     orders = Orders.objects.all()
-#     function_orders = FunctionOrders.objects.all()
-
-#     # Apply filters if the dates are provided
-#     if from_date:
-#         orders = orders.filter(date__gte=from_date)  # Filter orders from the 'from_date'
-#         function_orders = function_orders.filter(date__gte=from_date)  # Filter function orders from the 'from_date'
-
-#     if to_date:
-#         orders = orders.filter(date__lte=to_date)  # Filter orders until the 'to_date'
-#         function_orders = function_orders.filter(date__lte=to_date)  # Filter function orders until the 'to_date'
-
-#     # Prepare the sales data, grouping by date
-#     sales_data = defaultdict(float)  # Using defaultdict to sum sales by date
-
-#     # Accumulate total sales for regular Orders by date
-#     for order in orders:
-#         sales_data[order.date] += order.total_sale  # Add the order's total sale to its corresponding date
-
-#     # Accumulate total sales for Function Orders by date
-#     for function_order in function_orders:
-#         sales_data[function_order.date] += function_order.total_sale  # Add the function order's total sale to its corresponding date
-
-#     # Prepare the final summary data
-#     sales_summary = []
-#     for date, total_sales in sales_data.items():
-#         sales_summary.append({
-#             'date': date,
-#             'total_sales': total_sales
-#         })
-
-#     # Pass data to the template
-#     context = {
-#         'sales_summary': sales_summary,
-#         'from_date': from_date_str,
-#         'to_date': to_date_str,
-#     }
-
-#     return render(request, 'sales_summary.html', context)
-
 
 def sales_summary(request):
     # Get date parameters from the request (if any)
@@ -1044,8 +1031,8 @@ def sales_summary(request):
     to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date() if to_date_str else None
 
     # Fetch Orders and FunctionOrders
-    orders = Orders.objects.all()
-    function_orders = FunctionOrders.objects.all()
+    orders = Orders.objects.filter(is_function=False)
+    function_orders = Orders.objects.filter(is_function=True)
 
     # If no date filter is provided, show sales only for today (current date)
     if not from_date and not to_date:
@@ -1071,7 +1058,7 @@ def sales_summary(request):
 
     # Accumulate total sales for Function Orders by date
     for function_order in function_orders:
-        sales_data[function_order.date] += function_order.total_sale  # Add the function order's total sale to its corresponding date
+        sales_data[function_order.date] += function_order.function_total_sale  # Add the function order's total sale to its corresponding date
 
     # Prepare the final summary data
     sales_summary = []

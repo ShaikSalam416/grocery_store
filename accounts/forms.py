@@ -3,7 +3,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 # from .models import Product, Customer, PriceVariation, Sale, SaleItem
-from .models import Product, Orders, OrderItems, JournalBook,FunctionOrders, FunctionOrderItems, Payment
+# from .models import Product, Orders, OrderItems, JournalBook,FunctionOrders, FunctionOrderItems, Payment
+from .models import Product, Orders, OrderItems, JournalBook, Payment
+
 from datetime import date
 
 
@@ -72,7 +74,7 @@ class JournalBookForm(forms.ModelForm):
 class OrdersForm(forms.ModelForm):
     class Meta:
         model = Orders
-        fields = ['name', 'date']
+        fields = ['name', 'date', 'is_function']
 
     def __init__(self, *args, **kwargs):
         super(OrdersForm, self).__init__(*args, **kwargs)
@@ -88,25 +90,25 @@ class OrderItemsForm(forms.ModelForm):
         fields = ['product', 'quantity']
 
 
-class FunctionOrdersForm(forms.ModelForm):
-    class Meta:
-        model = FunctionOrders
-        fields = ['name', 'date']
+# class FunctionOrdersForm(forms.ModelForm):
+#     class Meta:
+#         model = FunctionOrders
+#         fields = ['name', 'date']
 
-    def __init__(self, *args, **kwargs):
-        super(FunctionOrdersForm, self).__init__(*args, **kwargs)
-        # You can set initial values if necessary
-        self.fields['name'].initial = 'Name'  # Set a default name if required
-        self.fields['date'].initial = date.today()  # Set today's date as the default
+#     def __init__(self, *args, **kwargs):
+#         super(FunctionOrdersForm, self).__init__(*args, **kwargs)
+#         # You can set initial values if necessary
+#         self.fields['name'].initial = 'Name'  # Set a default name if required
+#         self.fields['date'].initial = date.today()  # Set today's date as the default
 
-class FunctionOrderItemsForm(forms.ModelForm):
-    class Meta:
-        model = FunctionOrderItems
-        fields = ['product', 'quantity']
+# class FunctionOrderItemsForm(forms.ModelForm):
+#     class Meta:
+#         model = FunctionOrderItems
+#         fields = ['product', 'quantity']
 
 
 
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
-        fields = ['function_order_id','daily_order_id', 'amount','date']
+        fields = ['order_id', 'amount','date']
