@@ -33,15 +33,19 @@
         .navbar a:hover {
             color: #ffc107 !important; /* Gold on hover */
         }
-        .navbar-nav .nav-item {
-            margin-left: 15px;
-        }
+       
+        /* .navbar-nav .nav-item {
+            margin-left: 5px;
+        } */
         .footer {
             background-color: #343a40; /* Dark gray */
             color: white;
             padding: 10px 0;
             text-align: center;
             margin-top: auto; /* Pushes footer to the bottom */
+        }
+        .navbar-collapse {
+            font-size: 22px;
         }
         .custom-header {
         color: silver;              /* Change text color to silver */
@@ -51,7 +55,7 @@
         margin: 0;
         }
         .container {
-            margin-top: 20px;
+            margin-top: 5px;
             flex-grow: 1; /* Allows the container to expand and fill the space */
         }
         .main-content {
@@ -95,6 +99,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'daily_debt_customer_list' %}?is_function=False">Daily Due Customer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'flat_debt_customer_list' %}">Flats Due Customer</a>
                     </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">

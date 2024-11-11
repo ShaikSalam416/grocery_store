@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Journal Entry</title>
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Flats Customer Entry</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="{% url 'flat_debt_customer_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</body>
+{% endblock %}

@@ -8,9 +8,13 @@
     <style>
         body {
             text-transform: uppercase;
-            font-size: 22px;
+            font-size: 20px;
         }
-
+        .input-field {
+            padding: 5px;
+            width: 100%;  /* Ensure inputs fill the available width */
+            box-sizing: border-box;  /* Include padding and border in the element's total width */
+        }
         .product-list {
             margin-top: 10px;
             border: 1px solid #ced4da;
@@ -27,7 +31,7 @@
         }
 
         .billing-table {
-            max-height: 170px; /* Set a maximum height for the table */
+            max-height: 250px; /* Set a maximum height for the table */
             overflow-y: auto; /* Enable scrolling for the table */
             display: block; /* Make the table block-level */
             position: relative; /* Needed for sticky positioning */
@@ -94,12 +98,12 @@
                     {% csrf_token %}     
                 <tr>       
                 <input type="hidden" name="edit" value="{{ order.id }}"/>
-                <td><input type="text" name="item_id" value="{{ order.id }}" readonly/></td>
-                <td><input type="text" name="product_name" value="{{ order.product.name }}" readonly/></td>
-                <td><input type="text" name="quantity" value="{{ order.quantity }}" autofocus/></td>
-                <td><input type="text" name="mrp" value="{{ order.product.mrp }}" readonly/></td>
-                <td><input type="text" name="retail_price" value="{{ order.product.Retail_price }}" readonly/></td>
-                <td><input type="text" name="total_price" value="{{ order.total_price }}" /></td>
+                <td><input type="text" name="item_id" value="{{ order.id }}" readonly class="input-field"/></td>
+                <td><input type="text" name="product_name" value="{{ order.product.name }}" readonly class="input-field"/></td>
+                <td><input type="text" name="quantity" value="{{ order.quantity }}" autofocus onfocus="this.select()" class="input-field"/></td>
+                <td><input type="text" name="mrp" value="{{ order.product.mrp }}"  class="input-field"/></td>
+                <td><input type="text" name="retail_price" value="{{ order.product.Retail_price }}"  class="input-field"/></td>
+                <td><input type="text" name="total_price" value="{{ order.total_price }}" class="input-field"/></td>
                 <td>
                     <div class="btn-group" role="group">
                         <button type="submit" class="btn btn-warning btn-sm" autofocus>save</button>
@@ -110,7 +114,7 @@
             </form>
             {% else %}
             <tr>
-                <td>{{ order.id }}</td>
+                <td>{{ forloop.counter }}</td>
                 <td>{{ order.product.name }}</td>
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.product.mrp }}</td>
@@ -216,7 +220,7 @@
         let selectedIndex = -1;
 
         function searchProducts(event) {
-            const input = document.getElementById('productSearch').value.toLowerCase();
+            const input = document.getElementById('productSearch').value.trim().toLowerCase();
             const productList = document.getElementById('productList');
             const products = productList.getElementsByClassName('product-item');
             const button = document.getElementById('button');
@@ -227,8 +231,8 @@
             productList.style.display = input ? 'block' : 'none';
 
             for (let i = 0; i < products.length; i++) {
-                const productName = products[i].textContent.toLowerCase();
-                if (productName.includes(input)) {
+                const productName = products[i].textContent.trim().toLowerCase();
+                if (productName.startsWith(input)) {
                     count++;
                     products[i].style.display = 'block';
                     hasResults = true;
@@ -267,9 +271,16 @@
             } else if (event.key === 'Enter') {
                 if (selectedIndex >= 0) {
                     const selectedProduct = visibleProducts[selectedIndex];
-                    const quantityInput = selectedProduct.querySelector('input[name="quantity"]');
-                    quantityInput.focus(); // Focus on the quantity input for that product
+                    // const quantityInput = selectedProduct.querySelector('input[name="quantity"]');
+                    // quantityInput.focus(); // Focus on the quantity input for that product
+                     // You can submit the form for the selected product here
+                    const link = selectedProduct.querySelector('a'); // Find the anchor tag within the selected product item
+                    if (link) {
+                        link.click(); // Programmatically trigger the link click
+                        console.log("Product added to order:", selectedProduct);
+                    }
                 }
+                event.preventDefault(); 
             }
         });
 
@@ -294,6 +305,17 @@
                 }
             }
         }
+
+        //js for making quantity input selected all like ctrl+A 
+        document.addEventListener("DOMContentLoaded", function() {
+        // Apply to all input fields with quantity
+        let quantityFields = document.querySelectorAll('input[name="quantity"]');
+        quantityFields.forEach(function(field) {
+            field.addEventListener("focus", function() {
+                this.select();  // Select all text when the field is focused
+            });
+        });
+    });
     </script>
 </body>
 {% endblock %}

@@ -177,7 +177,7 @@
             // Show matching products
             productCards.forEach(card => {
                 const productName = card.querySelector('.card-title').textContent.toLowerCase();
-                if (productName.includes(input)) {
+                if (productName.startsWith(input)) {
                     card.style.display = 'table-row'; // Show matching row
                     hasVisibleItems = true;
                 }
@@ -191,5 +191,5 @@
             }
         }
     </script>
+    </body>
 {% endblock %}
-

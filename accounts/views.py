@@ -8,8 +8,8 @@ from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 # from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,FunctionOrdersForm, FunctionOrderItemsForm,PaymentForm
 # from .models import Product, JournalBook, Orders, OrderItems, FunctionOrders, FunctionOrderItems, Payment
-from .models import Product, JournalBook, Orders, OrderItems, Payment
-from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,PaymentForm
+from .models import Product, JournalBook, Orders, OrderItems, Payment, FlatsDebtCustomer
+from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,PaymentForm,FlatDebtCustomerForm
 
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -23,6 +23,7 @@ from django.db import connection
 from datetime import datetime
 from django.utils import timezone  # Import timezone module
 from collections import defaultdict
+import re
 
 
 
@@ -65,7 +66,7 @@ def product_list(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        product_list = Product.objects.filter(name__icontains=query).order_by('name')  # Filter by query
+        product_list = Product.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
 
@@ -85,7 +86,7 @@ def product_create(request):
             product.Retail_price = product.Retail_price or Decimal('0.00')
             product.Bulk_price = product.Bulk_price or Decimal('0.00')
             form.save()
-            return redirect('product_list')
+            return redirect('product_create')
     else:
         form = ProductForm()
     return render(request, 'product_form.html', {'form': form})
@@ -165,7 +166,7 @@ def function_debt_customer_list(request):
 
 # View For Daily Debt Customers
 def daily_debt_customer_list(request):
-     # Get date parameters from the request
+    # Get date parameters from the request
     from_date_str  = request.GET.get('from_date')
     to_date_str  = request.GET.get('to_date')
 
@@ -186,7 +187,7 @@ def daily_debt_customer_list(request):
 
   
 
-      # Convert from_date and to_date to datetime.date objects if they exist
+    # Convert from_date and to_date to datetime.date objects if they exist
     from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date() if from_date_str else None
     to_date = datetime.strptime(to_date_str , '%Y-%m-%d').date() if to_date_str  else None
 
@@ -225,6 +226,12 @@ def save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price):
         if edit is not None:
             try:        
                 foi = OrderItems.objects.get(id=selected_id)  # Get the existing item
+                #save changes to product model through edit option for mrp and retail price
+                p = get_object_or_404(Product,name = p_name)
+                p.mrp = Decimal(mrp)
+                p.Retail_price = Decimal(r_price)
+                p.save()
+
                 foi.product.name = p_name
                 if quan == '' or quan is None:
                     # quan = t_price/b_price
@@ -243,7 +250,14 @@ def save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price):
 
 def orders_list(request):
     orders = Orders.objects.filter(is_function=False).order_by('-date')  # '-' before 'date' indicates descending order
-    return render(request, 'orders_list.html', {'orders': orders})
+    query = request.GET.get('q', '')  # Get the search query from GET parameters
+
+    if query:
+        orders_list = Orders.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
+    else:
+        orders_list = Orders.objects.all().order_by('name')  # Get all products if no query
+
+    return render(request, 'orders_list.html', {'orders': orders, 'orders_list' : orders_list})
 
 def orders_create(request):
     edit = get_form_data(request,'edit')
@@ -266,7 +280,7 @@ def orders_create(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        product_list = Product.objects.filter(name__icontains=query).order_by('name')  # Filter by query
+        product_list = Product.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
     
@@ -352,7 +366,7 @@ def orders_detail(request, pk):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        product_list = Product.objects.filter(name__icontains=query).order_by('name')  # Filter by query
+        product_list = Product.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
 
@@ -426,7 +440,13 @@ def add_item_using_search(request, pk, pk1):
 #Views for Fucntion orders
 def function_orders_list(request):
     orders = Orders.objects.filter(is_function=True).order_by('-date')  # '-' before 'date' indicates descending order
-    return render(request, 'function_orders_list.html', {'orders': orders})
+    query = request.GET.get('q', '')  # Get the search query from GET parameters
+
+    if query:
+        orders_list = Orders.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
+    else:
+        orders_list = Orders.objects.all().order_by('name')  # Get all products if no query
+    return render(request, 'function_orders_list.html', {'orders': orders, 'orders_list' : orders_list})
 
 #For clicking on edit button
 def get_form_data(request,id):
@@ -441,6 +461,10 @@ def save_items(edit,selected_id,p_name,quan,b_price,t_price):
         if edit is not None:
             try:        
                 foi = OrderItems.objects.get(id=selected_id)  # Get the existing item
+                p = get_object_or_404(Product,name = p_name)
+                p.Bulk_price = Decimal(b_price)
+                p.save()
+
                 foi.product.name = p_name
                 if quan == '' or quan is None:
                     # quan = t_price/b_price
@@ -475,7 +499,7 @@ def function_orders_detail(request, pk):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        product_list = Product.objects.filter(name__icontains=query).order_by('name')  # Filter by query
+        product_list = Product.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
 
@@ -529,7 +553,7 @@ def function_orders_create(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        product_list = Product.objects.filter(name__icontains=query).order_by('name')  # Filter by query
+        product_list = Product.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
     else:
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
     
@@ -931,17 +955,61 @@ AND f.is_function = %s;
 
 
 def journal_list(request):
+    # Get start_date and end_date from the query parameters
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    if start_date and end_date:
-        # Filter entries based on the selected date range
-        journal_entries = JournalBook.objects.filter(date__range=[start_date, end_date])
-    else:
-        journal_entries = JournalBook.objects.all()  # Show all entries if no filter is applied
-    # journal_entries = JournalBook.objects.all()
-    return render(request, 'journal_list.html', {'journal_entries': journal_entries})
+    # Get today's date
+    today = timezone.now().date()
 
+    # Convert the date strings to datetime objects if they are provided
+    from_date = datetime.strptime(start_date, '%Y-%m-%d').date() if start_date else None
+    to_date = datetime.strptime(end_date, '%Y-%m-%d').date() if end_date else None
+
+    # Filter journal entries based on the provided dates
+    if from_date and to_date:
+        # Filter by the date range
+        journal_entries = JournalBook.objects.filter(date__range=[from_date, to_date])
+    else:
+        # Default to today's entries if no date range is provided
+        journal_entries = JournalBook.objects.filter(date=today)
+
+    # Helper function to calculate total amount for each entry
+    def calculate_total_amount(field_value):
+        """ Calculate the sum of numeric amounts from a string, regardless of format. """
+        total = 0
+        if field_value:
+        # Find all numbers in the string (ignores words, and other characters)
+            numbers = re.findall(r'\d+', field_value)
+        
+        # Convert found numbers to integers and sum them
+            total = sum(int(num) for num in numbers)
+    
+        return total
+
+
+    # Calculate totals for each type of payment field (today_payment, online_payment, previous_amount)
+    total_today_payment = 0
+    total_online_payment = 0
+    total_previous_amount = 0
+
+    for entry in journal_entries:
+        total_today_payment += calculate_total_amount(entry.today_payment)
+        total_online_payment += calculate_total_amount(entry.online_payment)
+        total_previous_amount += calculate_total_amount(entry.previous_amount)
+
+    # Combine all context variables in a single dictionary
+    context = {
+        'journal_entries': journal_entries,
+        'start_date': from_date,
+        'end_date': to_date,
+        'total_today_payment': total_today_payment,
+        'total_online_payment': total_online_payment,
+        'total_previous_amount': total_previous_amount,
+    }
+
+    # Return the rendered template with the context
+    return render(request, 'journal_list.html', context)
 
 # Create a new journal entry
 def journal_create(request):
@@ -1076,3 +1144,56 @@ def sales_summary(request):
     }
 
     return render(request, 'sales_summary.html', context)
+
+
+def flat_debt_customer_list(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if start_date and end_date:
+        # Filter entries based on the selected date range
+        flat_entries = FlatsDebtCustomer.objects.filter(date__range=[start_date, end_date])
+    else:
+        flat_entries = FlatsDebtCustomer.objects.all()  # Show all entries if no filter is applied
+    # journal_entries = JournalBook.objects.all()
+     # Calculate the total due_amount across all entries
+    total_due_amount = sum(entry.due_amount for entry in flat_entries)
+    context = {
+        'flat_entries': flat_entries,
+        'total_due_amount': total_due_amount,
+        
+    }
+    return render(request, 'flat_debt_customers_list.html', context)
+
+
+def flat_debt_customer_create(request):
+    if request.method == 'POST':
+        form = FlatDebtCustomerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('flat_debt_customer_list')
+    else:
+        form = FlatDebtCustomerForm()
+    return render(request, 'flat_debt_customers_form.html', {'form': form})
+
+
+# Update an existing journal entry
+def flat_debt_customer_update(request, pk):
+    flat_entry = get_object_or_404(FlatsDebtCustomer, pk=pk)
+    if request.method == 'POST':
+        form = FlatDebtCustomerForm(request.POST, instance=flat_entry)
+        if form.is_valid():
+            form.save()
+            return redirect('flat_debt_customer_list')
+    else:
+        form = FlatDebtCustomerForm(instance=flat_entry)
+    return render(request, 'flat_debt_customers_form.html', {'form': form})
+
+# Delete a journal entry
+def flat_debt_customer_delete(request, pk):
+    flat_entry = get_object_or_404(FlatsDebtCustomer, pk=pk)
+    if request.method == 'POST':
+        flat_entry.delete()
+        return redirect('flat_debt_customer_list')
+    return render(request, 'flat_debt_customers_confirm_delete.html', {'flat_entry': flat_entry})
+

@@ -11,7 +11,13 @@
           display: block; /* Make the table block-level */
           position: relative; /* Needed for sticky positioning */
         }
-      </style>
+
+        .no-results {
+            display: none; /* Initially hidden */
+            color: red; /* Style for the no results message */
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body class="container">
     <div class="row align-items-center mt-4">
@@ -25,33 +31,72 @@
             <a href="{% url 'orders_create' %}?is_function=false" class="btn btn-primary">Create New Order</a>
         </div>
     </div>
-    <div class="table-wrapper">
-    <table class="table table-bordered">
-        <thead class="thead-light" >
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td><a href = "{% url 'orders_detail' order.id%}"> {{ order.name }}</a></td>
-                    <td>{{ order.date }}</td>
-                    <td>
-                        <a href="{% url 'orders_update' order.id %}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{% url 'orders_delete' order.id %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <!-- Search Input -->
+    <div class="search-form mb-3">
+        <input type="text" id="productSearch" placeholder="Search by Name..." onkeyup="searchProducts()">
     </div>
+
+    <div class="table-wrapper">
+        <table class="table table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+                {% for order in orders %}
+                    <tr class="order-item">
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{% url 'orders_detail' order.id %}">{{ order.name }}</a></td>
+                        <td>{{ order.date }}</td>
+                        <td>
+                            <a href="{% url 'orders_update' order.id %}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{% url 'orders_delete' order.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- No Results Message (initially hidden) -->
+    <div class="no-results" id="noResultsMessage">No orders matched your search criteria.</div>
+    </div>
+
+    <script>
+        function searchProducts() {
+            const input = document.getElementById('productSearch').value.toLowerCase(); // Get the search input
+            const tableRows = document.querySelectorAll('.order-item'); // Select all order rows
+            const noResultsMessage = document.getElementById('noResultsMessage'); // No results message element
+
+            let hasVisibleItems = false;
+
+            // Iterate through all table rows
+            tableRows.forEach(row => {
+                const orderNameCell = row.cells[1]; // Get the 'Name' column (index 1)
+                const orderName = orderNameCell.textContent.toLowerCase(); // Get the name in lowercase
+
+                // Check if the row name starts with the input
+                if (orderName.startsWith(input)) {
+                    row.style.display = ''; // Show row if it matches
+                    hasVisibleItems = true;
+                } else {
+                    row.style.display = 'none'; // Hide row if it doesn't match
+                }
+            });
+
+            // Show or hide the no results message based on whether any items match
+            if (!hasVisibleItems) {
+                noResultsMessage.style.display = 'block'; // Show no results message
+            } else {
+                noResultsMessage.style.display = 'none'; // Hide no results message if results are found
+            }
+        }
+    </script>
 </body>
 {% endblock %}

@@ -73,4 +73,10 @@ urlpatterns = [
 
     #sales Urls
     path('overall/sales/',views.sales_summary,name='sales_summary'),
+
+    #Flats due customers
+    path('flats/debt/customers/create/',views.flat_debt_customer_create,name='flat_debt_customer_create'),
+    path('flats/debt/customers/list/',views.flat_debt_customer_list,name='flat_debt_customer_list'),
+    path('flats/debt/customers/<int:pk>/edit/',views.flat_debt_customer_update, name='flat_debt_customer_update'),
+    path('flats/debt/customers/<int:pk>/delete/',views.flat_debt_customer_delete, name='flat_debt_customer_delete'),
 ]
