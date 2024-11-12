@@ -71,7 +71,7 @@ def product_list(request):
         product_list = Product.objects.all().order_by('name')  # Get all products if no query
 
     # Set up pagination
-    paginator = Paginator(product_list, 100)  # Show 10 products per page
+    paginator = Paginator(product_list, 2000)  # Show 10 products per page
     page_number = request.GET.get('page')  # Get the current page number from GET parameters
     page_obj = paginator.get_page(page_number)  # Get the products for the current page
 
