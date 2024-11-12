@@ -158,7 +158,7 @@ def function_debt_customer_list(request):
     context = {
         'debt_customers': formatted_debt_cust,  # List of dicts for easy template access
         'from_date': from_date_str,
-        'to_date': to_date_str
+        'to_date': to_date_str,
     }
     return render(request, 'list_debt_customers.html', context)
 

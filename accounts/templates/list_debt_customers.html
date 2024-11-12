@@ -3,23 +3,31 @@
 {% block content %}
 <head>
     <style>
-         .table-wrapper {
+        .table-wrapper {
             overflow-y: auto;
             max-height: 250px; /* Adjust the height as needed */
             display: block; /* Make the table block-level */
             position: relative; /* Needed for sticky positioning */
-      }
-    </style>
- </head>
-<!-- Begin page content -->
+        }
 
-<!-- <div class="container mt-5">
-    <h1 class="text-center mb-4">Functions Debt Customers</h1>
-    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">
-        <i class="fas fa-arrow-left"></i> Back to Home
-    </a>
-     -->
-     <div class="row align-items-center mt-4">
+        /* Add style for search bar */
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        /* Add style for the "no results" message */
+        #noResultsMessage {
+            display: none;
+            color: red;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row align-items-center mt-4">
         <div class="text-center mb-4">
             <a href="{% url 'home' %}" class="btn btn-secondary">Back to home</a>
         </div>
@@ -27,7 +35,6 @@
             <h1>Function Debt Customers</h1>
         </div>   
     </div>
-    
 
     <!-- Form for filtering by dates -->
     <form method="get" class="mb-4">
@@ -46,36 +53,71 @@
         </div>
     </form>
 
-    <!-- Table of debt customers -->
-<div class = "table-wrapper">
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Customer Name</th>
-                    <th>Amount Due</th>
-                    <th>Date</th>
-                    <!-- <th>Actions</th> -->
-
-                </tr>
-            </thead>
-            <tbody>
-                {% for debt_customer in debt_customers %}
-                    <tr>
-                        <td>{{ debt_customer.name }}</td>
-                        <td>{{ debt_customer.pending_amount }}</td>
-                        <td>{{ debt_customer.date|date:"Y-m-d" }}</td>
-                        
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">No debt customers found</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Search bar to filter customers by name -->
+    <div class="search-bar">
+        <input type="text" id="searchCustomer" class="form-control" placeholder="Search by Customer Name" onkeyup="searchCustomers()">
     </div>
-</div>
 
+    <!-- No results message -->
+    <div id="noResultsMessage">
+        <p>No results matched your search.</p>
+    </div>
+
+    <!-- Table of debt customers -->
+    <div class="table-wrapper">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Amount Due</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable">
+                    {% for debt_customer in debt_customers %}
+                        <tr class="customer-row">
+                            <td>{{ debt_customer.name }}</td>
+                            <td>{{ debt_customer.pending_amount }}</td>
+                            <td>{{ debt_customer.date|date:"Y-m-d" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No debt customers found</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Function to search customers by name
+        function searchCustomers() {
+            const input = document.getElementById('searchCustomer').value.toLowerCase(); // Get search input
+            const rows = document.querySelectorAll('#customerTable .customer-row'); // Get all customer rows
+            let hasVisibleItems = false;
+
+            // Loop through each row and hide/show based on the search input
+            rows.forEach(row => {
+                const customerName = row.querySelector('td').textContent.toLowerCase(); // Get the customer name (from the first cell)
+                if (customerName.startsWith(input)) {
+                    row.style.display = ''; // Show row if name matches
+                    hasVisibleItems = true;
+                } else {
+                    row.style.display = 'none'; // Hide row if name doesn't match
+                }
+            });
+
+            // If no rows match the search, show the 'No results' message
+            if (!hasVisibleItems) {
+                document.getElementById('noResultsMessage').style.display = 'block';
+            } else {
+                document.getElementById('noResultsMessage').style.display = 'none';
+            }
+        }
+    </script>
+
+</body>
 
 {% endblock %}

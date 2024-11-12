@@ -1,4 +1,3 @@
-{% extends 'base.html' %}
 {% block content %}
 <head>
     <meta charset="UTF-8">
@@ -6,7 +5,7 @@
     <title>Orders {{ Orders.name }}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-            body{
+        body{
             text-transform: uppercase;
             font-size: 20px;
         }
@@ -25,7 +24,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
         }
         .billing-table {
-            max-height: 250px; /* Set a maximum height for the table */
+            max-height: 350px; /* Set a maximum height for the table */
             overflow-y: auto; /* Enable scrolling for the table */
             display: block; /* Make the table block-level */
             position: relative; /* Needed for sticky positioning */
@@ -56,6 +55,8 @@
             top: 0; /* Position from the top of the scrollable container */
             background-color: #f8f9fa; /* Background color for better visibility */
             z-index: 10; /* Ensure the header stays on top of the content */
+            font-size: 25px;
+
         }
 
         .table th, .table td {
@@ -64,6 +65,7 @@
 
         .mt-3 {
             margin-top: 1rem; /* Adjust if needed */
+            font-size: 18px;
         }
     </style>
 </head>
