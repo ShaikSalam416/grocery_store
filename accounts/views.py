@@ -153,6 +153,12 @@ def function_debt_customer_list(request):
         formatted_debt_cust = [
             customer for customer in formatted_debt_cust if customer['date'] <= to_date
         ]
+        # Get the current date
+     # Sort customers so that today's customers are on top, followed by previous dates in descending order
+    today = datetime.today().date()
+    formatted_debt_cust.sort(key=lambda x: (x['date'] != today, x['date']), reverse=True)
+
+
 
      # Pass the formatted data to the template
     context = {
@@ -200,6 +206,11 @@ def daily_debt_customer_list(request):
         formatted_debt_cust = [
             customer for customer in formatted_debt_cust if customer['date'] <= to_date
         ]
+
+        # Sort customers so that today's customers are on top, followed by previous dates in descending order
+    today = datetime.today().date()
+    formatted_debt_cust.sort(key=lambda x: (x['date'] != today, x['date']), reverse=True)
+
 
      # Pass the formatted data to the template
     context = {
