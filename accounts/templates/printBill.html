@@ -95,7 +95,7 @@
             <div class="s-column">S.</div>
             <div class="item-name">Item</div>
             <div class="s-column">Qty</div>
-            <!-- <div class="amount-column">Mrp</div> -->
+            <div class="amount-column">Mrp</div>
             <div class="amount-column">Rate</div>
             <div class="amount-column1">Amt</div>
         </div>
@@ -107,7 +107,7 @@
                     <div class="s-column">{{ forloop.counter }}</div>
                     <div class="item-name">{{ order.product.name }}</div>
                     <div class="s-column">{{ order.quantity }}</div>
-                    <!-- <div class="amount-column">{{ order.product.mrp|floatformat:0  }}</div> -->
+                    <div class="amount-column">{{ order.product.mrp|floatformat:0  }}</div>
                     <div class="amount-column">{{ order.product.Retail_price|floatformat:0  }}</div>
                     <div class="amount-column1">{{ order.total_price }}</div>
                 </div>
