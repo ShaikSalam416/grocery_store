@@ -68,7 +68,7 @@
             <tbody>
                 {% for entry in journal_entries %}
                     <tr>
-                        <td>{{ entry.id }}</td> <!-- Entry ID -->
+                        <td>{{ forloop.counter }}</td> <!-- Entry ID -->
                         <td>{{ entry.today_payment }}</td> <!-- Today's Payment -->
                         <td>{{ entry.online_payment }}</td> <!-- Online Payment -->
                         <td>{{ entry.previous_amount }}</td> <!-- Previous Amount -->

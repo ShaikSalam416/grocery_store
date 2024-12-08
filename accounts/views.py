@@ -335,6 +335,7 @@ def orders_create(request):
         'total_price' : total_price,
         'orderItems' : order_items,
         'selected_id' : selected_id,
+
     })
 
 
@@ -384,7 +385,7 @@ def orders_detail(request, pk):
     order = get_object_or_404(Orders, pk=pk)
     product = Product.objects.all()
     order_items = OrderItems.objects.filter(orders=order)
-    total_price = sum(item.total_price for item in order_items)
+    total_price = round(sum(item.total_price for item in order_items))
 
     if request.method == 'POST':
         form = OrderItemsForm(request.POST)
@@ -517,7 +518,7 @@ def function_orders_detail(request, pk):
     order = get_object_or_404(Orders, pk=pk)
     product = Product.objects.all()
     order_items = OrderItems.objects.filter(orders=order)
-    total_price = round(sum(item.function_total_price for item in order_items))  
+    total_price = round(sum(item.function_total_price for item in order_items))
 
 
     if request.method == 'POST':
@@ -763,9 +764,12 @@ def orders_print_bill(request,pk,cashReceived):
     total = int(round(subtotal))  # Total after rounding
     due_amount = int(round(total - cash_recieved))
     # saved_amount = (sum(item.mrp_price for item in order_items))-total
-    saved_amount = sum(
-        item.mrp_price - item.total_price for item in order_items if item.mrp_price > 0
-    )
+    saved_amount = Decimal(sum(
+        (item.product.mrp*item.quantity - item.product.Retail_price*item.quantity) for item in order_items if item.mrp_price > 0
+    ))
+    saved_amount = saved_amount.quantize(Decimal('0.00'))  # Round to 2 decimal places
+
+
     order_id = order.id
     cash_recieved1 = total_cash_recieved(order_id,cash_recieved)
     due_amount = int(round(total - cash_recieved1))
@@ -805,7 +809,7 @@ def orders_print_bill(request,pk,cashReceived):
         'Orders': order,
         'orderItems': order_items,
         'total': total,
-        'cash' : cash_recieved,
+        'cash' : cash_recieved1,
         'due' : due_amount,
         'saved_amount' : saved_amount,
         'billnumber' : bill_number,
@@ -1129,7 +1133,7 @@ def sales_summary(request):
             function_orders = function_orders.filter(date__lte=to_date)  # Filter function orders until the 'to_date'
 
     # Prepare the sales data, grouping by date
-    sales_data = defaultdict(float)  # Using defaultdict to sum sales by date
+    sales_data = defaultdict(Decimal)  # Using defaultdict to sum sales by date
 
     # Accumulate total sales for regular Orders by date
     for order in orders:

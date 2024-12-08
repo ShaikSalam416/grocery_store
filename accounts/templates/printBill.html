@@ -43,7 +43,7 @@
             text-align: center;
         }
         .s-column {
-            flex: 0 0 30px; /* Fixed width for "S." column */
+            flex: 0 0 10px; /* Fixed width for "S." column */
             text-align: left; /* Align text to the left */
             white-space: nowrap; /* Prevent text wrapping */
         }
@@ -51,8 +51,10 @@
             flex: 1; /* Allow the item name column to grow */
             text-align: left; /* Align item names to the left */
             white-space: normal; /* Allow wrapping */
-            max-width: 120px; /* Set a maximum width for item names */
+            max-width: 100px; /* Set a maximum width for item names */
             overflow-wrap: break-word; /* Break long words if needed */
+            text-overflow: ellipsis; /* Add ellipsis for overflow */
+
         }
         .amount-column {
             flex: 0 0 40px; /* Fixed width for amount columns */
@@ -64,6 +66,10 @@
             text-align: right; /* Align amounts to the right */
             white-space: nowrap; /* Prevent text wrapping */
         }
+        .bold.item.header {
+        display: flex; /* Use flexbox for header alignment */
+    }
+    
     </style>
 </head>
 <body>
@@ -81,7 +87,7 @@
             <div>Bill No: {{ billnumber }}</div>
         </div>
         <div class="item">
-            <div>Customer: CASH</div>
+            <div>Customer: {{ Orders.name }}</div>
         </div>
         <div class="line"></div>
         
@@ -89,9 +95,9 @@
             <div class="s-column">S.</div>
             <div class="item-name">Item</div>
             <div class="s-column">Qty</div>
-            <div class="amount-column">Mrp</div>
+            <!-- <div class="amount-column">Mrp</div> -->
             <div class="amount-column">Rate</div>
-            <div class="amount-column">Amt</div>
+            <div class="amount-column1">Amt</div>
         </div>
         <div class="line"></div>
 
@@ -101,9 +107,9 @@
                     <div class="s-column">{{ forloop.counter }}</div>
                     <div class="item-name">{{ order.product.name }}</div>
                     <div class="s-column">{{ order.quantity }}</div>
-                    <div class="amount-column">{{ order.product.mrp|floatformat:0  }}</div>
+                    <!-- <div class="amount-column">{{ order.product.mrp|floatformat:0  }}</div> -->
                     <div class="amount-column">{{ order.product.Retail_price|floatformat:0  }}</div>
-                    <div class="amount-column">{{ order.total_price }}</div>
+                    <div class="amount-column1">{{ order.total_price }}</div>
                 </div>
             {% endfor %}
         {% else %}

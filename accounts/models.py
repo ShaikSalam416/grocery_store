@@ -70,11 +70,16 @@ class OrderItems(models.Model):
     
     @property
     def total_price(self):
-        return int(self.quantity * self.product.Retail_price)
+        # return Decimal(self.quantity * self.product.Retail_price)
+        total = Decimal(self.quantity) * Decimal(self.product.Retail_price)
+        return total.quantize(Decimal('0.00'))
     
     @property
     def function_total_price(self):
-        return int(self.quantity * self.product.Bulk_price)
+        # return Decimal(self.quantity * self.product.Bulk_price)
+        total = Decimal(self.quantity) * Decimal(self.product.Bulk_price)
+        return total.quantize(Decimal('0.00'))
+        # return round(total)
     
     @property
     def mrp_price(self):
