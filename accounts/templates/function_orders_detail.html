@@ -75,7 +75,7 @@
 
     </style>
 </head>
-    <body class="container">
+    <body onload="clearInputFields()" class="container">
         <div class="d-flex justify-content-between align-items-center mt-4">
             <h1 class="mb-0">Name: {{ Orders.name }}</h1>
             <a href="{% url 'function_orders_list' %}" class="btn btn-secondary">Back to Orders</a>
@@ -307,16 +307,27 @@
             }
         }
 
-        //js for making quantity input selected all like ctrl+A 
-        document.addEventListener("DOMContentLoaded", function() {
-        // Apply to all input fields with quantity
-        let quantityFields = document.querySelectorAll('input[name="quantity"]');
-        quantityFields.forEach(function(field) {
-            field.addEventListener("focus", function() {
-                this.select();  // Select all text when the field is focused
+    //     //js for making quantity input selected all like ctrl+A 
+    //     document.addEventListener("DOMContentLoaded", function() {
+    //     // Apply to all input fields with quantity
+    //     let quantityFields = document.querySelectorAll('input[name="quantity"]');
+    //     quantityFields.forEach(function(field) {
+    //         field.addEventListener("focus", function() {
+    //             this.select();  // Select all text when the field is focused
+    //         });
+    //     });
+    // });
+    function clearInputFields() {
+            // Select all input fields with the name 'quantity'
+            let quantityFields = document.querySelectorAll('input[name="quantity"]');
+            
+            // Loop through each of the fields and clear the value
+            quantityFields.forEach(function(field) {
+                field.value = "";  // Clear the value of the input field
             });
-        });
-    });
+            
+            console.log("Quantity fields cleared.");
+        }
 
     </script>
 </body>
