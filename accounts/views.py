@@ -3,11 +3,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from .forms import CustomAuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-# from .forms import ProductForm, CustomerForm, PriceVariationForm, SaleForm, SaleItemForm, CustomUserCreationForm
-# from .models import Product, Customer, PriceVariation, Sale, SaleItem
 from django.core.paginator import Paginator
-# from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,FunctionOrdersForm, FunctionOrderItemsForm,PaymentForm
-# from .models import Product, JournalBook, Orders, OrderItems, FunctionOrders, FunctionOrderItems, Payment
 from .models import Product, JournalBook, Orders, OrderItems, Payment, FlatsDebtCustomer
 from .forms import CustomUserCreationForm, ProductSearchForm, OrdersForm, ProductForm,JournalBookForm, OrderItemsForm,PaymentForm,FlatDebtCustomerForm
 
@@ -15,13 +11,12 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import generic
-import json
 from datetime import date
 from decimal import Decimal
-from django.db.models import Sum
+from django.db.models import Sum,Q
 from django.db import connection
 from datetime import datetime
-from django.utils import timezone  # Import timezone module
+from django.utils import timezone  
 from collections import defaultdict
 import re
 
@@ -60,7 +55,6 @@ def home(request):
 
 
 # View to list all products
-
 def product_list(request):
     form = ProductSearchForm(request.GET or None)  # Initialize the form with GET data
     query = request.GET.get('q', '')  # Get the search query from GET parameters
@@ -157,9 +151,6 @@ def function_debt_customer_list(request):
      # Sort customers so that today's customers are on top, followed by previous dates in descending order
     today = datetime.today().date()
     formatted_debt_cust.sort(key=lambda x: (x['date'] != today, x['date']), reverse=True)
-
-
-
      # Pass the formatted data to the template
     context = {
         'debt_customers': formatted_debt_cust,  # List of dicts for easy template access
@@ -273,10 +264,6 @@ def orders_list(request):
 def orders_create(request):
     edit = get_form_data(request,'edit')
     selected_id = get_form_data(request,'item_id')
-    # p_name = get_form_data(request,'product_name')
-    # quan = get_form_data(request,'quantity')
-    # b_price = get_form_data(request,'bulk_price')
-    # t_price = get_form_data(request,'total_price')
     p_name = request.GET.get('product_name')
     quan = request.GET.get('quantity')
     mrp = request.GET.get('mrp')
@@ -362,16 +349,11 @@ def orders_delete(request, pk):
 def orders_detail(request, pk):
     edit = get_form_data(request,'edit')
     selected_id = get_form_data(request,'item_id')
-    # p_name = get_form_data(request,'product_name')
-    # quan = get_form_data(request,'quantity')
-    # b_price = get_form_data(request,'bulk_price')
-    # t_price = get_form_data(request,'total_price')
     p_name = request.GET.get('product_name')
     quan = request.GET.get('quantity')
     mrp = request.GET.get('mrp')
     r_price = request.GET.get('retail_price')
     t_price = request.GET.get('total_price')
-
     save_order_items(edit,selected_id,p_name,quan,mrp,r_price,t_price)
 
     form = ProductSearchForm(request.GET or None)  # Initialize the form with GET data
@@ -455,7 +437,7 @@ def function_orders_list(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        orders_list = Orders.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
+        orders_list = Orders.objects.filter(name__istartswith=query).order_by('-date')  # Filter by query
     else:
         orders_list = Orders.objects.all().order_by('name')  # Get all products if no query
     return render(request, 'function_orders_list.html', {'orders': orders, 'orders_list' : orders_list})
@@ -495,10 +477,6 @@ def save_items(edit,selected_id,p_name,quan,b_price,t_price):
 def function_orders_detail(request, pk):
     edit = get_form_data(request,'edit')
     selected_id = get_form_data(request,'item_id')
-    # p_name = get_form_data(request,'product_name')
-    # quan = get_form_data(request,'quantity')
-    # b_price = get_form_data(request,'bulk_price')
-    # t_price = get_form_data(request,'total_price')
     p_name = request.GET.get('product_name')
     quan = request.GET.get('quantity')
     b_price = request.GET.get('bulk_price')
@@ -548,10 +526,6 @@ def function_orders_detail(request, pk):
 def function_orders_create(request):
     edit = get_form_data(request,'edit')
     selected_id = get_form_data(request,'item_id')
-    # p_name = get_form_data(request,'product_name')
-    # quan = get_form_data(request,'quantity')
-    # b_price = get_form_data(request,'bulk_price')
-    # t_price = get_form_data(request,'total_price')
     p_name = request.GET.get('product_name')
     quan = request.GET.get('quantity')
     b_price = request.GET.get('bulk_price')
@@ -783,8 +757,8 @@ def orders_print_bill(request,pk,cashReceived):
             out_of_stock_items.append(item)
 
     # If there are out-of-stock items, redirect to the out-of-stock view
-    if out_of_stock_items:
-        return redirect('daily_any_item_out_of_stock', pk=pk, cash_received=cashReceived)
+    # if out_of_stock_items:
+    #     return redirect('daily_any_item_out_of_stock', pk=pk, cash_received=cashReceived)
 
     
     
@@ -836,6 +810,7 @@ def orders_print_bill(request,pk,cashReceived):
 
 
     # Render the template
+    # return render(request, 'orders_ordersitems.html', context)
     return render(request, 'printBill.html', context)  # Replace with your actual template name
 
 
@@ -860,12 +835,10 @@ def function_orders_print_bill(request,pk,cashReceived):
             out_of_stock_items.append(item)
 
     # If there are out-of-stock items, redirect to the out-of-stock view
-    if out_of_stock_items:
-        return redirect('function_any_item_out_of_stock', pk=pk, cash_received=cashReceived)
+    # if out_of_stock_items:
+    #     return redirect('function_any_item_out_of_stock', pk=pk, cash_received=cashReceived)
     
 
-    # Get the current date to track the bill number
-    # today = timezone.now().date()
     today =  datetime.now()    
     date = datetime.now().date()
     # Check if the session already has the bill number for today
@@ -1212,3 +1185,43 @@ def flat_debt_customer_delete(request, pk):
         return redirect('flat_debt_customer_list')
     return render(request, 'flat_debt_customers_confirm_delete.html', {'flat_entry': flat_entry})
 
+
+#view for highest sold products
+def top_products(request):
+    # Get today's date
+    today = timezone.localdate()
+    day = today
+
+    # Retrieve search query from GET parameters (default to empty string)
+    query = request.GET.get('q', '').strip()
+
+    # Filter products based on the search query if provided
+    if query:
+        product_list = Product.objects.filter(name__istartswith=query).annotate(total_sold=Sum('orderitems__quantity'))
+    else:
+        # Get all products if no search query is provided
+        product_list = Product.objects.annotate(total_sold=Sum('orderitems__quantity'))
+
+    # Get the highest selling products (total sold quantity)
+    tp = product_list.order_by('-total_sold')
+
+    # Get sales for today (sold quantity for today)
+    stp = Product.objects.annotate(
+        day_sold=Sum(
+            'orderitems__quantity', 
+            filter=Q(orderitems__orders__date=day)
+        )
+    ).order_by('-day_sold')
+
+    # Create a dictionary for quick lookup of daily sales by product ID
+    day_sales_dict = {product.id: product.day_sold for product in stp}
+
+    # Attach the day_sold data to each product in the `tp` queryset
+    for product in tp:
+        product.day_sold = day_sales_dict.get(product.id, 0)
+
+    # Pass the results and the search query back to the template
+    return render(request, 'top_selling_products.html', {
+        'top_selling_products': tp,
+        'search_query': query  # Pass the search query back to the template
+    })

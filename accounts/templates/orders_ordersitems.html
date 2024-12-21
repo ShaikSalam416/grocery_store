@@ -191,23 +191,35 @@
     </div>
     
     <script>
-         document.getElementById('printBillButton').onclick = function() {
-        // Prompt the user for an integer
-        let userInput = window.prompt("Please enter the cash received:");
+       // Function to trigger the print operation
+       function triggerPrint() {
+            // Prompt for the cash received value
+            let cashReceivedInput = window.prompt("Please enter the cash received:");
+            let cashReceived = parseInt(cashReceivedInput, 10);
 
-        // Convert the input to an integer
-        let cashReceived = parseInt(userInput, 10);
+            // Check if the input is valid
+            if (!isNaN(cashReceived)) {
+                // Construct the URL
+                let url = `/orders/detail/{{Orders.id}}/print_bill/${cashReceived}/`;
 
-        // Check if the input is a valid integer
-        if (!isNaN(cashReceived)) {
-            // Construct the URL
-            let url = `/orders/detail/{{Orders.id}}/print_bill/${cashReceived}/`;
-            // Redirect to the URL
-            window.location.href = url;
-        } else {
-            alert("That's not a valid integer!");
+                // Redirect to the URL
+                window.location.href = url;
+            } else {
+                alert("That's not a valid integer!");
+            }
         }
-    };
+
+        // Event listener for button click
+        document.getElementById('printBillButton').onclick = function() {
+            triggerPrint();
+        };
+
+        // Event listener for keyboard input (e.g., pressing "Enter" after typing "print")
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'p') {
+                triggerPrint();
+            }
+        });
         function appendURL(obj,obj1){
             url1=document.getElementById("button").href;
             if(obj.value!='')
@@ -299,16 +311,27 @@
                 }
             }
         }
-        //js for making quantity input selected all like ctrl+A 
-        document.addEventListener("DOMContentLoaded", function() {
-        // Apply to all input fields with quantity
-        let quantityFields = document.querySelectorAll('input[name="quantity"]');
-        quantityFields.forEach(function(field) {
-            field.addEventListener("focus", function() {
-                this.select();  // Select all text when the field is focused
+    //     //js for making quantity input selected all like ctrl+A 
+    //     document.addEventListener("DOMContentLoaded", function() {
+    //     // Apply to all input fields with quantity
+    //     let quantityFields = document.querySelectorAll('input[name="quantity"]');
+    //     quantityFields.forEach(function(field) {
+    //         field.addEventListener("focus", function() {
+    //             this.select();  // Select all text when the field is focused
+    //         });
+    //     });
+    // });
+    function clearInputFields() {
+            // Select all input fields with the name 'quantity'
+            let quantityFields = document.querySelectorAll('input[name="quantity"]');
+            
+            // Loop through each of the fields and clear the value
+            quantityFields.forEach(function(field) {
+                field.value = "";  // Clear the value of the input field
             });
-        });
-    });
+            
+            console.log("Quantity fields cleared.");
+        }
     </script>
 </body>
 {% endblock %}

@@ -152,8 +152,14 @@
         <div class="center">Thank You, Visit Again!</div>
     </div>
     <script>
-        window.onload = function() {
+        function printAndRedirect() {
             window.print();
+            window.onafterprint = function() {
+                window.location.href = '/orders/create1/?is_function=false'; // Redirect to the provided URL
+            };
+        };
+        window.onload = function() {
+            printAndRedirect();
         };
     </script>
 </body>

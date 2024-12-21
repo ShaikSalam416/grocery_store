@@ -148,8 +148,14 @@
     </div>
     <script>
 
-        window.onload = function() {
+function printAndRedirect() {
             window.print();
+            window.onafterprint = function() {
+                window.location.href = '/orders/function/create1/?is_function=true'; // Redirect to the provided URL
+            };
+        };
+        window.onload = function() {
+            printAndRedirect();
         };
     </script>
 </body>

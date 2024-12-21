@@ -195,24 +195,53 @@
 
     <script>
 
-        document.getElementById('printBillButton').onclick = function() {
-        // Prompt the user for an integer
-        let userInput = window.prompt("Please enter the cash received:");
+    //     document.getElementById('printBillButton').onclick = function() {
+    //     // Prompt the user for an integer
+    //     let userInput = window.prompt("Please enter the cash received:");
 
-        // Convert the input to an integer
-        let cashReceived = parseInt(userInput, 10);
+    //     // Convert the input to an integer
+    //     let cashReceived = parseInt(userInput, 10);
 
-        // Check if the input is a valid integer
-        if (!isNaN(cashReceived)) {
-            // Construct the URL
-            let url = `/orders/detail/{{Orders.id}}/print_bill/${cashReceived}/`;
-            // Redirect to the URL
-            window.location.href = url;
-        } else {
-            alert("That's not a valid integer!");
+    //     // Check if the input is a valid integer
+    //     if (!isNaN(cashReceived)) {
+    //         // Construct the URL
+    //         let url = `/orders/detail/{{Orders.id}}/print_bill/${cashReceived}/`;
+    //         // Redirect to the URL
+    //         window.location.href = url;
+    //     } else {
+    //         alert("That's not a valid integer!");
+    //     }
+    // };
+            // Function to trigger the print operation
+            function triggerPrint() {
+            // Prompt for the cash received value
+            let cashReceivedInput = window.prompt("Please enter the cash received:");
+            let cashReceived = parseInt(cashReceivedInput, 10);
+
+            // Check if the input is valid
+            if (!isNaN(cashReceived)) {
+                // Construct the URL
+                let url = `/orders/detail/{{Orders.id}}/print_bill/${cashReceived}/`;
+
+                // Redirect to the URL
+                window.location.href = url;
+            } else {
+                alert("That's not a valid integer!");
+            }
         }
-    };
 
+        // Event listener for button click
+        document.getElementById('printBillButton').onclick = function() {
+            triggerPrint();
+        };
+
+        // Event listener for keyboard input (e.g., pressing "Enter" after typing "print")
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'p') {
+                triggerPrint();
+            }
+        });
+        
         function appendURL(obj,obj1){
             url1=document.getElementById("button").href;
             if(obj.value!='')

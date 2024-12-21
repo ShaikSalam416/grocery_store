@@ -15,7 +15,9 @@ urlpatterns = [
     path('products/edit/<int:pk>/', views.product_update, name='product_update'),
     path('products/delete/<int:pk>/', views.product_delete, name='product_delete'),
 
-    
+    #urls for top selling products
+    path('top/sold/products/', views.top_products, name='top_products'),
+
     #URLS for daily orders
     path('orders/', views.orders_list, name='orders_list'),
     path('orders/update/<int:pk>/', views.orders_update, name='orders_update'),
@@ -64,9 +66,6 @@ urlpatterns = [
 
     #Function DebtCustomer  URLs
     path('debt/function/customers/', views.function_debt_customer_list, name='function_debt_customer_list'),
-    # path('debt/customers/create/', views.create_debt_customer, name='create_debt_customer'),
-    # path('debt/customers/update/<int:pk>/', views.update_debt_customer, name='update_debt_customer'),
-    # path('debt/customers/delete/<int:pk>/', views.delete_debt_customer, name='delete_debt_customer'),
 
     #Daily DebtCustomer  URLs
     path('daily/debt/customers/', views.daily_debt_customer_list, name='daily_debt_customer_list'),

@@ -189,7 +189,7 @@
     </div>
 
     <script>
-          document.getElementById('printBillButton').onclick = function() {
+           function triggerPrint() {
         // Prompt the user for an integer
         let userInput = window.prompt("Please enter the cash received:");
 
@@ -206,6 +206,15 @@
             alert("That's not a valid integer!");
         }
     };
+    document.getElementById('printBillButton').onclick = function() {
+        triggerPrint();
+    };
+    document.addEventListener('keydown',function (event){
+        if(event.key ==='p'){
+            triggerPrint();
+        }
+    });
+    
     function appendURL(obj,obj1){
             url1=document.getElementById("button").href;
             if(obj.value!='')
@@ -306,16 +315,27 @@
             }
         }
 
-    //js for making quantity input selected all like ctrl+A 
-    document.addEventListener("DOMContentLoaded", function() {
-        // Apply to all input fields with quantity
-        let quantityFields = document.querySelectorAll('input[name="quantity"]');
-        quantityFields.forEach(function(field) {
-            field.addEventListener("focus", function() {
-                this.select();  // Select all text when the field is focused
+    // //js for making quantity input selected all like ctrl+A 
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     // Apply to all input fields with quantity
+    //     let quantityFields = document.querySelectorAll('input[name="quantity"]');
+    //     quantityFields.forEach(function(field) {
+    //         field.addEventListener("focus", function() {
+    //             this.select();  // Select all text when the field is focused
+    //         });
+    //     });
+    // });
+    function clearInputFields() {
+            // Select all input fields with the name 'quantity'
+            let quantityFields = document.querySelectorAll('input[name="quantity"]');
+            
+            // Loop through each of the fields and clear the value
+            quantityFields.forEach(function(field) {
+                field.value = "";  // Clear the value of the input field
             });
-        });
-    });
+            
+            console.log("Quantity fields cleared.");
+        }
         
     </script>
 {% endblock %}

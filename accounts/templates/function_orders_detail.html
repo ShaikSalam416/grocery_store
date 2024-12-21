@@ -193,7 +193,7 @@
     </div>
 
     <script>
-        document.getElementById('printBillButton').onclick = function() {
+        function triggerPrint() {
         // Prompt the user for an integer
         let userInput = window.prompt("Please enter the cash received:");
 
@@ -210,6 +210,15 @@
             alert("That's not a valid integer!");
         }
     };
+    document.getElementById('printBillButton').onclick = function() {
+        triggerPrint();
+    };
+    document.addEventListener('keydown',function (event){
+        if(event.key ==='p'){
+            triggerPrint();
+        }
+    });
+
         function appendURL(obj,obj1){
             url1=document.getElementById("button").href;
             if(obj.value!='')
