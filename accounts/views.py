@@ -107,7 +107,7 @@ def product_delete(request, pk):
 
 #View to show out of stock products from product model 
 def out_of_stock_products(request):
-    osp = Product.objects.filter(stock_quantity = 0)
+    osp = Product.objects.filter(stock_quantity__lt = 3)
     context = {'out_of_stock_products': osp}
     return render(request, 'out_of_stock_products.html', context)
 
