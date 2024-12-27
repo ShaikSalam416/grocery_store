@@ -48,7 +48,7 @@
                 </tr>
             </thead>
             <tbody id="ordersTableBody">
-                {% for order in orders %}
+                {% for order in orders_list %}
                     <tr class="order-item">
                         <td>{{ forloop.counter }}</td>
                         <td><a href="{% url 'orders_detail' order.id %}">{{ order.name }}</a></td>

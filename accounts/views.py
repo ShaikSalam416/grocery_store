@@ -255,9 +255,9 @@ def orders_list(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        orders_list = Orders.objects.filter(name__istartswith=query).order_by('name')  # Filter by query
+        orders_list = Orders.objects.filter(is_function=False,name__istartswith=query).order_by('-date','-name')  # Filter by query
     else:
-        orders_list = Orders.objects.all().order_by('name')  # Get all products if no query
+        orders_list = Orders.objects.filter(is_function=False).order_by('-date','-name')
 
     return render(request, 'orders_list.html', {'orders': orders, 'orders_list' : orders_list})
 
@@ -437,9 +437,11 @@ def function_orders_list(request):
     query = request.GET.get('q', '')  # Get the search query from GET parameters
 
     if query:
-        orders_list = Orders.objects.filter(name__istartswith=query).order_by('-date')  # Filter by query
+        # If a query exists, filter orders by name (case-insensitive) and order by date (most recent first)
+        orders_list = Orders.objects.filter(is_function=True, name__icontains=query).order_by('-date','-name')
     else:
-        orders_list = Orders.objects.all().order_by('name')  # Get all products if no query
+        # Get all orders where is_function=True and order them by date (most recent first)
+        orders_list = Orders.objects.filter(is_function=True).order_by('-date','-name')
     return render(request, 'function_orders_list.html', {'orders': orders, 'orders_list' : orders_list})
 
 #For clicking on edit button
